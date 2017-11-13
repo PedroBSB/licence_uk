@@ -1,0 +1,90 @@
+---
+title: "Statistical Analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##George message 1.
+
+a. based on the variable “thing_author_id", I want to check whether there are any changes in terms of “license" use across  the variable “period”
+b. I also want to create a remixing variable which shows the ways individual contributors contribute through a remixing strategy; in the sense, some contributors will contribute a lot of original designs but never remix, others will contribute purely through remixing prior designs, and the third types of contributors will contribute their original designs but also remix with other contributors’ design. I want to use the first type as a private strategy, the second as a free riding/collective strategy, and the third as a private-collective strategy. In the literature it suggests private-collective strategy is more effective than the private or free riding strategy.
+
+##Goerge message 2.
+
+I have been thinking about how to interpret and incorporate license types in our analysis. In our data, there are 12 types of licenses. We can use the existing strong-weak copyleft (Santos, Kuk et al. 2013) to distinguish them, but the underlying relationship between excludability and rivalry is so not apparent. Because we want to examine the impact of excludability and rivalry on private-collective innovation so I have attempted to decode license types into: excludability (low, medium, high), rivalry in use, social rivalry, reuse (commercial; is commercial use allowed?), reuse (social), and derivative (is derivative allowed? yes or no). Please see attached. Somehow, they can be used as dummy variables in the analysis. 
+
+In decoding the licenses, I apply the following definition
+
+Rivalry-in-use design context = imitation will lower the value of a design to the designers; what about design derivative? 
+
+Social rivalry in design = competition for social status (peer-to-peer recognition, reputation, social position) within the community
+
+Excludability = how feasible to prevent others from reuse the design; a high excludability design means it is easy to withhold and use it privately whereas low excludability design means it is prohibitively costly to prevent others to reuse the design (e.g. open hardware) and/or it is easy for others to discern once the design is in use (Stranburg 2008)
+
+My idea is to tie license types (as a proxy of micro-governance and control of digital resources; these can be related to Ostrom's common property regime) with entrepreneurial pursuit in terms of entrepreneurial experimentation, opportunities, and patterns of participation. This may be translated license types (dummy coded) as the independent variables, and used them to predict "derivatives" and "made". 
+
+In one of the recent publication by two of the special issue editors (Satish and Mike), they examine entrepreneurial ecosystems in terms of entrepreneurial opportunity, discovery, and pursuit (Autio, Samisen, Thomas, and Wright, 2017, "digital affordances, spatial affordances, and the genesis of entrepreneurial ecosystems", published in strategic entrepreneurship journal). Below is an extract from the abstract of the paper and I highlight the bits that we may want to convey in terms of our contribution. 
+
+We suggest that entrepreneurial ecosystems differ from traditional clusters by their emphasis on the exploitation of digital affordances; by their organization around entrepreneurial opportunity discovery and pursuit; by their emphasis on business model innovation; by voluntary horizontal knowledge spillovers; and by cluster-external locus of entrepreneurial opportunities. We highlight how these distinctive characteristics set entrepreneurial ecosystems apart from regional cluster phenomena discussed in received economic geography and innovation literatures. We suggest policymakers need to adopt novel approaches to stimulate entrepreneurial ecosystems that differ from those in place to develop industrial clusters or support already established small- and medium-sized companies.
+
+In relation to our paper, the exploitation of digital affordances (in relation to the digital properties of design artifacts) will be affected by license types, which in turn affect the organization of digital entrepreneurship (in terms of entrepreneurial opportunity, discovery, and pursuit). We can also use license types (as a proxy of private, public and private-collective modes of social and business model of innovation) to examine the sharing behaviour (reciprocal vs. non-reciprocal), and the subsequent impact on derivatives as our "micro" clusters of innovation. 
+
+Sorry there is a lot to take in. Next week, we can go through your analysis, and see how we can translate the above into one of few research hypotheses in our paper. Let me know when the best time for you to Skype. 
+
+Regards, 
+
+George
+
+
+## Reading the data.
+
+I am using the last dataset sent by George Kuk entitled **upload_date**:
+
+```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Call the library
+library(readxl)
+#Read the dataset
+license.df<-read_xlsx("Data/upload_date.xlsx",1)
+#Create the factors
+license.df$license<-as.factor(license.df$license)
+license.df$Type <-as.factor(license.df$Type )
+```
+
+## Multinomial Logit.
+
+The straightforward analysis is to implement the Multinomial Logit Regression.
+
+```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE}
+#Call the mlogit library
+library(foreign)
+library(nnet)
+library(stargazer)
+license.df<-na.omit(license.df)
+license.df$license = relevel(license.df$license, ref = "Creative Commons - Attribution - Share Alike")
+
+multi1 <- multinom(license~1+files_has_scad+tags_has_scad+comments_count+collection_count+  
+downloads_count+files_count+thing_like_count+made_count+remix_count+        
+remixed_froms_count+views_count+tags_count+Being_featured+inv+                
+out, data=license.df, maxit = 10000)
+```
+
+The estimates are given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, results='asis'}
+#Estimates
+stargazer(multi1, type="html", out="multi1.htm")
+```
+
+Relative risk ratios allow an easier interpretation of the logit coefficients. They are the
+exponentiated value of the logit coefficients:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, results='asis'}
+#Relative risk ratios
+multi1.rrr = exp(coef(multi1))
+stargazer(multi1, coef=list(multi1.rrr), p.auto=FALSE,  type="html", out="rrrmulti1.htm")
+```
+
+```
