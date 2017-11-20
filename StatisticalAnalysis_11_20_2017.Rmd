@@ -84,8 +84,7 @@ d. the final fourth type is anti-business. They are: "Creative Commons - Public 
 #Classify
 license.df <- license.df %>% 
                mutate(entrepreneurial.strategy=
-                        ifelse(license %in% c("All Rights Reserved",   "Attribution - Non-Commercial - No Derivatives",  "Creative Commons - Attribution - Non-Commercial"),"1",
-                        ifelse(license %in% c("BSD License", "Creative Commons - Attribution", "Creative Commons - Attribution - Share Alike"),"2",
+                        ifelse(license %in% c("All Rights Reserved",   "Attribution - Non-Commercial - No Derivatives","Attribution - Non-Commercial - Share Alike","Creative Commons - Attribution - Non-Commercial"),"1",   ifelse(license %in% c("BSD License", "Creative Commons - Attribution", "Creative Commons - Attribution - Share Alike"),"2",
                         ifelse(license %in% c("Creative Commons - Attribution - No Derivatives"),"3","4"))))
 ```
 
