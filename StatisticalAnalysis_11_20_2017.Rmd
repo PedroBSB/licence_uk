@@ -49,6 +49,7 @@ summa1.df<-license.df %>%
                      remix_count=sum(remix_count),
                      remixed_froms_count=sum(remixed_froms_count),
                      views_count=sum(views_count),
+                     out=sum(out),
                      tags_count=sum(tags_count)
                      )
 ```
