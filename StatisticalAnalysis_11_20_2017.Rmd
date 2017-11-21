@@ -27,7 +27,7 @@ Somehow we need to retain the time information considering the key events that m
 
 ```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
 #Invoke dplyr package
-library(dplyr)
+library(tidyverse)
 license.df<-license.df %>% 
   mutate(key.event=ifelse(upload_date<"2012-09-24","1",
                    ifelse(upload_date<"2013-11-05","2","3")))
@@ -88,7 +88,7 @@ temp <- temp %>%
 temp$design.strategy<-as.factor(temp$design.strategy)   
 
 #Join with the license.df
-license.df <- full_join(license.df, temp, by=c("thing_author_id","key.event"))
+results.df <- full_join(summa1.df, temp, by=c("thing_author_id","key.event"))
               
 ```
 
@@ -109,6 +109,30 @@ license.df <- license.df %>%
                mutate(entrepreneurial.strategy=
                         ifelse(license %in% c("All Rights Reserved",   "Attribution - Non-Commercial - No Derivatives","Attribution - Non-Commercial - Share Alike","Creative Commons - Attribution - Non-Commercial"),"1",   ifelse(license %in% c("BSD License", "Creative Commons - Attribution", "Creative Commons - Attribution - Share Alike"),"2",
                         ifelse(license %in% c("Creative Commons - Attribution - No Derivatives"),"3","4"))))
+
+#Summarize by frequency
+summa2.df<-license.df %>% 
+           group_by(thing_author_id,key.event, entrepreneurial.strategy) %>% 
+           summarise (n = n()) %>%
+           mutate(freq = n / sum(n)) %>% 
+           select(-n)
+#Spread
+summa3.df<-summa2.df %>% 
+           group_by(thing_author_id,key.event) %>% 
+           spread(entrepreneurial.strategy,freq)
+
+#Replace missing by zero
+summa3.df[is.na(summa3.df)] <- 0
+colnames(summa3.df)[3:6]<-c("ES1","ES2","ES3","ES4")
+
+#Join all data
+results.df <- full_join(results.df, summa3.df, by=c("thing_author_id","key.event"))
+#sort data
+results2.df<- results.df %>% 
+             ungroup() %>%
+             arrange(thing_author_id, key.event)
+#Export data
+write.csv(results2.df, "Data/AggreatedData.csv",  row.names = F)
 ```
 
 
@@ -116,13 +140,5 @@ At this stage, I'd run an inductive analysis by examining the relationship betwe
 
 
 So we need to discuss this when you come to this point in time. Consider the high likelihood that license types may be subject to the two critical events (see point 2 re close source and patent). 
-
-A designer could be ES_2 in the first period, but switched to ES_4 in periods 2 and 3. Others would release certain designs under a mixed licence arrangement: ES_3 and ES_4 for example. And also many designers may leave the community and stop contribution. I think these patterns are really interesting. I predict that designers, who are serial inventor and primarily adopt ES_2, will be the least affected. Can you test this prediction. 
-
-Lastly, I think it's the most interesting but need more data exploration are the interaction effects between ES x design strategy. I will predict the interaction between "blended strategy" x "entrepreneurial strategy type 2" are more likely to increase derivative and made_count. 
-
-I hope the above makes some sense. I will be working 7 days a week from now on. SO please don't hesitate to contact me. 
-
-George
 
 
