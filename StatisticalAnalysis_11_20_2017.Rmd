@@ -114,9 +114,7 @@ license.df <- license.df %>%
 #Summarize by frequency
 summa2.df<-license.df %>% 
            group_by(thing_author_id,key.event, entrepreneurial.strategy) %>% 
-           summarise (n = n()) %>%
-           mutate(freq = n / sum(n)) %>% 
-           select(-n)
+           summarise (freq = n()) 
 #Spread
 summa3.df<-summa2.df %>% 
            group_by(thing_author_id,key.event) %>% 
