@@ -19,6 +19,7 @@ In my prior analysis, I used zero-inflated negative binomial regression
 ```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
 #Read the dataset
 license.df<-read.csv("Data/AggreatedData.csv")
+license.df<-na.omit(license.df)
 #Standard negative binomial model
 library(MASS)
 library(knitr)
@@ -75,23 +76,28 @@ In a separate analysis to explore archetypes of designers, can you use the chang
 
 ```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
 #Finite mixture of negative binomial regression  (FLXMRnegbin)
-library(pscl)
-m3 <- zeroinfl(out ~ (1+files_count+thing_like_count+collection_count)*(1+design.strategy+
-                     ES1+ES2+ES3+ES4) | key.event , data = license.df,
-               dist = "negbin", EM = TRUE)
-summary(m3)
+library(countreg)
+library(flexmix)
+mycont <- list(iter = 1000, tol = 0.1, class = "r")
+as(mycont, "FLXcontrol")
+fm0 <- flexmix(out ~ files_count+thing_like_count+collection_count, 
+               data = license.df, k = 2, model = FLXMRnegbin(), control= mycont)
+summary(fm0)
+parameters(fm0)
+
+#Plots
+rf0 <- lapply(1:2, function(i)
+  glm.nb(out ~ files_count+thing_like_count+collection_count, data = license.df, weights = posterior(fm0)[,i]))
+
+## Rootograms
+r01 <- rootogram(rf0[[1]])
+r02 <- rootogram(rf0[[2]])
+
+par(mfrow = c(1, 2))
+rootogram(glm.nb(out ~ files_count+thing_like_count+collection_count, data = license.df))
+plot(r01 + r02)
 ```
 
-
-or 
-
-2. Can you use the changes of ES over period as a way to identify different archetypes. 
-For example in response to “closed source” - key event 2, a designer may change from the least restrictive (ES2) to the next restrictive level (e.g. ES3), i.e. it will start to impose conditions. There are some designers will change from ES_3 to ES_1, i.e. they will regress from sharing to non sharing (a sign of distrust). It may be a good idea to cross tabulate ES by Period. This will allow you to find out the distribution of designers, one that is more vulnerable than the others to the key events. A group of designers is less subject to key events, whereas others are more likely to adjust their contribution according to the severity of the key events (closed source to patent).. We may end up with three or four archetypes of designers. But then we don’t want to have too many archetypes. 
-
-For example, 
-first archetype “the serial inventor" = started with ES_2 (the least restrictive) and remained as ES_S, then “the Darwinians”, “communitarians”, and “the missionaries”. See the attached paper. Below is an extract from the paper. Here firms will be designers.
-
-darwinian identity are focused on competition with other firms [designers] and are driven by their own economic self-interest, but founders with communitarian and missionary identities deviate in fundamental ways from that standard. Communitarians view their firms as social objects that support and are supported by a particular community because of mutually beneficial relationships. Missionaries see their firms as political objects that can advance a particular cause for the benefit of society at large. Our results also show that founders behave and act in ways that are consistent with their identities and thereby imprint their self-concepts on key dimensions of their emerging firms. These findings have a number of fundamental implications for thinking about firm creation processes (including the early stage of opportunity identification), firm creation outcomes, and firm founders as enterprising individuals.
 
 
 
