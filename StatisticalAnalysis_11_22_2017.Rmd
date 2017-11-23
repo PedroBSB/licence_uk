@@ -1,0 +1,101 @@
+---
+title: "Statistical Analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#George message 4.
+Further to our discussion, below I’d try to summarise. 
+
+In my prior analysis, I used zero-inflated negative binomial regression
+1. dependent variables = out 
+2. control variables = files_count, thing_like_count, collection_count
+3. design strategy, period as the main effects, and their interactions
+
+##Standard negative binomial model.
+```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Read the dataset
+license.df<-read.csv("Data/AggreatedData.csv")
+#Standard negative binomial model
+library(MASS)
+library(knitr)
+m.full <- glm.nb(out ~(1+design.strategy+key.event)+
+                      (files_count+ thing_like_count+collection_count)*(1+design.strategy+key.event), data = license.df)
+res<-summary(m.full)
+res
+```
+
+
+##Model 1.
+In your analysis, you can include the following tests or models
+
+1. Model 1 with all the control variables plus the period to account the zero part (re period, I am not sure whether this should be included in model 2)
+
+
+```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Zero-inflated negative binomial model
+library(pscl)
+m1 <- zeroinfl(out ~ files_count+thing_like_count+collection_count| key.event , data = license.df,
+               dist = "negbin", EM = TRUE)
+summary(m1)
+```
+
+
+##Model 2.
+2. Model 2 with all the controls plus the main effects (design strategy, ES)
+
+```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Zero-inflated negative binomial model
+m2 <- zeroinfl(out ~ files_count+thing_like_count+collection_count+ design.strategy+
+                     ES1+ES2+ES3+ES4 | key.event , data = license.df,
+               dist = "negbin", EM = TRUE)
+summary(m2)
+```
+
+
+
+##Model 3.
+3. Model 3 = model 2 plus the interaction effect between design strategy x ES
+
+```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Zero-inflated negative binomial model
+m3 <- zeroinfl(out ~ (1+files_count+thing_like_count+collection_count)*(1+design.strategy+
+                     ES1+ES2+ES3+ES4) | key.event , data = license.df,
+               dist = "negbin", EM = TRUE)
+summary(m3)
+```
+
+##Model 4.
+In a separate analysis to explore archetypes of designers, can you use the changes of ES over the period to classify designers. 
+
+1. can you inductively using some sort of reduction/cluster technique (using ES strategy to infer and cluster designers) 
+
+```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Finite mixture of negative binomial regression  (FLXMRnegbin)
+library(pscl)
+m3 <- zeroinfl(out ~ (1+files_count+thing_like_count+collection_count)*(1+design.strategy+
+                     ES1+ES2+ES3+ES4) | key.event , data = license.df,
+               dist = "negbin", EM = TRUE)
+summary(m3)
+```
+
+
+or 
+
+2. Can you use the changes of ES over period as a way to identify different archetypes. 
+For example in response to “closed source” - key event 2, a designer may change from the least restrictive (ES2) to the next restrictive level (e.g. ES3), i.e. it will start to impose conditions. There are some designers will change from ES_3 to ES_1, i.e. they will regress from sharing to non sharing (a sign of distrust). It may be a good idea to cross tabulate ES by Period. This will allow you to find out the distribution of designers, one that is more vulnerable than the others to the key events. A group of designers is less subject to key events, whereas others are more likely to adjust their contribution according to the severity of the key events (closed source to patent).. We may end up with three or four archetypes of designers. But then we don’t want to have too many archetypes. 
+
+For example, 
+first archetype “the serial inventor" = started with ES_2 (the least restrictive) and remained as ES_S, then “the Darwinians”, “communitarians”, and “the missionaries”. See the attached paper. Below is an extract from the paper. Here firms will be designers.
+
+darwinian identity are focused on competition with other firms [designers] and are driven by their own economic self-interest, but founders with communitarian and missionary identities deviate in fundamental ways from that standard. Communitarians view their firms as social objects that support and are supported by a particular community because of mutually beneficial relationships. Missionaries see their firms as political objects that can advance a particular cause for the benefit of society at large. Our results also show that founders behave and act in ways that are consistent with their identities and thereby imprint their self-concepts on key dimensions of their emerging firms. These findings have a number of fundamental implications for thinking about firm creation processes (including the early stage of opportunity identification), firm creation outcomes, and firm founders as enterprising individuals.
+
+
+
+
+
+
+
