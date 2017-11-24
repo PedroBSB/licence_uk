@@ -27,6 +27,7 @@ m.full <- glm.nb(out ~(1+design.strategy+key.event)+
                       (files_count+ thing_like_count+collection_count)*(1+design.strategy+key.event), data = license.df)
 res<-summary(m.full)
 res
+save.image("Chunk1.RData")
 ```
 
 
@@ -42,6 +43,7 @@ library(pscl)
 m1 <- zeroinfl(out ~ files_count+thing_like_count+collection_count| key.event , data = license.df,
                dist = "negbin", EM = TRUE)
 summary(m1)
+save.image("Chunk2.RData")
 ```
 
 
@@ -54,6 +56,7 @@ m2 <- zeroinfl(out ~ files_count+thing_like_count+collection_count+ design.strat
                      ES1+ES2+ES3+ES4 | key.event , data = license.df,
                dist = "negbin", EM = TRUE)
 summary(m2)
+save.image("Chunk3.RData")
 ```
 
 
@@ -64,9 +67,10 @@ summary(m2)
 ```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
 #Zero-inflated negative binomial model
 m3 <- zeroinfl(out ~ (1+files_count+thing_like_count+collection_count)*(1+design.strategy+
-                     ES1+ES2+ES3+ES4) | key.event , data = license.df,
+                     ES1+ES2+ES3+ES4) | key.event , control=zeroinfl.control(method = "BFGS", maxit = 100000), data = license.df,
                dist = "negbin", EM = TRUE)
 summary(m3)
+save.image("Chunk4.RData")
 ```
 
 ##Model 4.
@@ -96,6 +100,7 @@ r02 <- rootogram(rf0[[2]])
 par(mfrow = c(1, 2))
 rootogram(glm.nb(out ~ files_count+thing_like_count+collection_count, data = license.df))
 plot(r01 + r02)
+save.image("Chunk5.RData")
 ```
 
 
