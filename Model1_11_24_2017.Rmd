@@ -1,0 +1,140 @@
+---
+title: "Statistical Analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Model 1.
+
+##George message 4.
+**Further to our discussion, below I’d try to summarise. **
+
+**In my prior analysis, I used zero-inflated negative binomial regression**
+**1. dependent variables = out **
+**2. control variables = files_count, thing_like_count, collection_count**
+**3. design strategy, period as the main effects, and their interactions**
+
+The first model used to estimate the relation between *out* and the others covariates was th **Standard negative binomial model**:
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Read the dataset
+license.df<-read.csv("Data/AggreatedData.csv")
+license.df<-na.omit(license.df)
+#Standard negative binomial model
+library(MASS)
+library(knitr)
+m.full <- glm.nb(out ~(1+design.strategy+key.event)+
+                      (files_count+ thing_like_count+collection_count)*(1+design.strategy+key.event), data = license.df)
+res<-summary(m.full)
+res
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE, results='asis'}
+library(xtable)
+load("Chunk1.RData")
+table <- xtable(res)
+# Coefficients
+print(
+   xtable(table, align="lcccc"), # align columns
+   type = "html", 
+   html.table.attributes = 'align="center", # center table in page
+                            rules="rows",   # only keep horizontal rows
+                            width=50%,      # increase table width to 50% page
+                            frame="below"') # remove border except bottom rule
+```
+#Model 2.
+
+##George message 4.
+**In your analysis, you can include the following tests or models**
+
+**1. Model 1 with all the control variables plus the period to account the zero part (re period, I am not sure whether this should be included in model 2)**
+
+The second model fitted was the **Zero-inflated negative binomial model** using the *key.event* to control the zero part.
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Zero-inflated negative binomial model
+library(pscl)
+m1 <- zeroinfl(out ~ files_count+thing_like_count+collection_count| key.event , data = license.df,
+               dist = "negbin", EM = TRUE)
+summary(m1)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE, results='asis'}
+load("Chunk2.RData")
+library(pscl)
+library(stargazer)
+stargazer(m1, type = "html")
+```
+
+#Model 3.
+
+##George message 4.
+**2. Model 2 with all the controls plus the main effects (design strategy, ES)**
+
+The third model fitted was the **Zero-inflated negative binomial model** using the *key.event* to control the zero part and *design strategy* and *ES* as covariates too. 
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Zero-inflated negative binomial model
+m2 <- zeroinfl(out ~ files_count+thing_like_count+collection_count+ design.strategy+
+                     ES1+ES2+ES3+ES4 | key.event , data = license.df,
+               dist = "negbin", EM = TRUE)
+summary(m2)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE, results='asis'}
+load("Chunk3.RData")
+library(pscl)
+library(stargazer)
+stargazer(m2, type = "html")
+```
+
+#Model 4.
+
+##George message 4.
+**3. Model 3 = model 2 plus the interaction effect between design strategy x ES**
+
+The fourth model I am facing some problems with the estimation process. There is some numerical issues that I need to solve...
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Zero-inflated negative binomial model
+m3 <- zeroinfl(out ~ (1+files_count+thing_like_count+collection_count)*(1+design.strategy+
+                     ES1+ES2+ES3+ES4) | key.event , control=zeroinfl.control(method = "BFGS", maxit = 100000), data = license.df,
+               dist = "negbin", EM = TRUE)
+summary(m3)
+```
+
+#Model 5.
+
+##George message 4.
+**In a separate analysis to explore archetypes of designers, can you use the changes of ES over the period to classify designers. **
+
+**1. can you inductively using some sort of reduction/cluster technique (using ES strategy to infer and cluster designers) **
+
+The last model is running in my machine and It is based on **Finite mixture of negative binomial regression** which has a nice interpretation...
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Finite mixture of negative binomial regression  (FLXMRnegbin)
+library(countreg)
+library(flexmix)
+mycont <- list(iter = 1000, tol = 0.1, class = "r")
+as(mycont, "FLXcontrol")
+fm0 <- flexmix(out ~ files_count+thing_like_count+collection_count, 
+               data = license.df, k = 2, model = FLXMRnegbin(), control= mycont)
+summary(fm0)
+parameters(fm0)
+
+#Plots
+rf0 <- lapply(1:2, function(i)
+  glm.nb(out ~ files_count+thing_like_count+collection_count, data = license.df, weights = posterior(fm0)[,i]))
+
+## Rootograms
+r01 <- rootogram(rf0[[1]])
+r02 <- rootogram(rf0[[2]])
+
+par(mfrow = c(1, 2))
+rootogram(glm.nb(out ~ files_count+thing_like_count+collection_count, data = license.df))
+plot(r01 + r02)
+```
