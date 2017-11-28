@@ -1,0 +1,199 @@
+---
+title: "Statistical Analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#George message 5.
+##1. use free riding as our reference model or private riding as our reference model
+*I suspect there won’t be any difference between free riding and private. If that’s the case, we will chose private as our reference*
+###Standard negative binomial model.
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE, results='asis'}
+library(xtable)
+library(MASS)
+library(knitr)
+library(pscl)
+library(stargazer)
+```
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Read the dataset
+license.df<-read.csv("Data/AggreatedData.csv")
+license.df<-na.omit(license.df)
+license.df$key.event<-as.factor(license.df$key.event)
+license.df <- within(license.df, key.event <- relevel(key.event, ref = "1"))
+
+#Define the reference (free-riding)
+license.df <- within(license.df, design.strategy <- relevel(design.strategy, ref = "free-riding"))
+
+#Standard negative binomial model
+library(MASS)
+library(knitr)
+m.full <- glm.nb(out ~(1+design.strategy+key.event)+
+                      (files_count+ thing_like_count+collection_count)*(1+design.strategy+key.event), data = license.df)
+res<-summary(m.full)
+res
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE, results='asis'}
+library(xtable)
+load("Chunk6.RData")
+table <- xtable(res)
+# Coefficients
+print(
+   xtable(table, align="lcccc"), # align columns
+   type = "html", 
+   html.table.attributes = 'align="center", # center table in page
+                            rules="rows",   # only keep horizontal rows
+                            width=50%,      # increase table width to 50% page
+                            frame="below"') # remove border except bottom rule
+```
+
+Using as **private** reference:
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Define the reference (free-riding)
+license.df <- within(license.df, design.strategy <- relevel(design.strategy, ref = "private"))
+
+#Standard negative binomial model
+library(MASS)
+library(knitr)
+m.full <- glm.nb(out ~(1+design.strategy+key.event)+
+                      (files_count+ thing_like_count+collection_count)*(1+design.strategy+key.event), data = license.df)
+res<-summary(m.full)
+res
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE, results='asis'}
+library(xtable)
+load("Chunk7.RData")
+table <- xtable(res)
+# Coefficients
+print(
+   xtable(table, align="lcccc"), # align columns
+   type = "html", 
+   html.table.attributes = 'align="center", # center table in page
+                            rules="rows",   # only keep horizontal rows
+                            width=50%,      # increase table width to 50% page
+                            frame="below"') # remove border except bottom rule
+```
+
+
+###Zero-inflated negative binomial model - Model 1.
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Define the reference (free-riding)
+license.df <- within(license.df, design.strategy <- relevel(design.strategy, ref = "free-riding"))
+
+#Zero-inflated negative binomial model
+library(pscl)
+m1 <- zeroinfl(out ~ files_count+thing_like_count+collection_count+key.event | files_count+thing_like_count+collection_count+key.event , data = license.df,
+               dist = "negbin", EM = TRUE)
+summary(m1)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Chunk8.RData")
+library(pscl)
+library(stargazer)
+summary(m1)
+```
+
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m2<- glm.nb(out ~ files_count+thing_like_count+collection_count+key.event, data = license.df)
+vuong(m1, m2)
+```
+
+Using as **private** reference:
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Define the reference (private)
+license.df <- within(license.df, design.strategy <- relevel(design.strategy, ref = "private"))
+
+#Zero-inflated negative binomial model
+library(pscl)
+m1 <- zeroinfl(out ~ files_count+thing_like_count+collection_count+key.event| files_count+thing_like_count+collection_count+key.event , data = license.df,
+               dist = "negbin", EM = TRUE)
+summary(m1)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+library(xtable)
+load("Chunk9.RData")
+summary(m1)
+```
+
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m2<- glm.nb(out ~ files_count+thing_like_count+collection_count+key.event, data = license.df)
+vuong(m1, m2)
+```
+
+###Zero-inflated negative binomial model - Model 2.
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Define the reference (free-riding)
+license.df <- within(license.df, design.strategy <- relevel(design.strategy, ref = "free-riding"))
+
+#Zero-inflated negative binomial model
+m1 <- zeroinfl(out ~ files_count+thing_like_count+collection_count+ design.strategy+
+                     ES1+ES2+ES3+ES4 + key.event | files_count+thing_like_count+collection_count+ design.strategy+
+                     ES1+ES2+ES3+ES4 + key.event , data = license.df,
+               dist = "negbin", EM = TRUE)
+summary(m1)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE,}
+load("Chunk10.RData")
+summary(m1)
+```
+
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m2<- glm.nb(out ~ files_count+thing_like_count+collection_count+ design.strategy+
+                     ES1+ES2+ES3+ES4 + key.event , data = license.df)
+vuong(m1, m2)
+```
+
+Using as **private** reference:
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Define the reference (private)
+license.df <- within(license.df, design.strategy <- relevel(design.strategy, ref = "private"))
+
+#Zero-inflated negative binomial model
+library(pscl)
+m1 <- zeroinfl(out ~ files_count+thing_like_count+collection_count+ design.strategy+
+                     ES1+ES2+ES3+ES4 + key.event | files_count+thing_like_count+collection_count+ design.strategy+
+                     ES1+ES2+ES3+ES4 + key.event , data = license.df,
+               dist = "negbin", EM = TRUE)
+summary(m1)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+library(xtable)
+load("Chunk11.RData")
+tt<-summary(m1)
+summary(m1)
+```
+
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m2<- glm.nb(out ~ files_count+thing_like_count+collection_count+ design.strategy+
+                     ES1+ES2+ES3+ES4 + key.event , data = license.df)
+vuong(m1, m2)
+```
+
+
+
+
+
