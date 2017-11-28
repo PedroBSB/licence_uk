@@ -1,0 +1,66 @@
+---
+title: "Statistical Analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Model 4.
+In a separate analysis to explore archetypes of designers, can you use the changes of ES over the period to classify designers. 
+
+1. can you inductively using some sort of reduction/cluster technique (using ES strategy to infer and cluster designers) 
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Chunk5.RData")
+library(countreg)
+library(flexmix)
+```
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Finite mixture of negative binomial regression  (FLXMRnegbin)
+library(countreg)
+library(flexmix)
+mycont <- list(iter = 1000, tol = 0.1, class = "r")
+as(mycont, "FLXcontrol")
+fm0 <- flexmix(out ~ files_count+thing_like_count+collection_count, 
+               data = license.df, k = 2, model = FLXMRnegbin(), control= mycont)
+```
+
+The statistical summary is given by:
+
+```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+summary(fm0)
+```
+
+And the parameter estimates are:
+```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+parameters(fm0)
+```
+
+In this model we assumed two mixtures of data, the first one has 2581 observations and the second group 44021 observations. The parameter estimates are very close each other, so probably, for those variables and with the assupmtion of two groups there is no need to split the model using Finite mixture of negative binomial regression.
+
+This could not be true if we increase the number of clusters or if we change the covariates. The full summary estimates are:
+
+
+```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+lapply(1:2, function(i)
+  glm.nb(out ~ files_count+thing_like_count+collection_count, data = license.df, weights = posterior(fm0)[,i]))
+```
+
+Finaly, we have the individual weights for each observation in the **AggreatedData.csv** file:
+
+```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+write.csv(posterior(fm0), "Data/Weights.csv")
+```
+
+
+
+
+
+
+
+
+
+

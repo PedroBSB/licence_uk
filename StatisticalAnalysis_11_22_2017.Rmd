@@ -92,7 +92,7 @@ parameters(fm0)
 #Plots
 rf0 <- lapply(1:2, function(i)
   glm.nb(out ~ files_count+thing_like_count+collection_count, data = license.df, weights = posterior(fm0)[,i]))
-
+save.image("Chunk5.RData")
 ## Rootograms
 r01 <- rootogram(rf0[[1]])
 r02 <- rootogram(rf0[[2]])
@@ -100,7 +100,7 @@ r02 <- rootogram(rf0[[2]])
 par(mfrow = c(1, 2))
 rootogram(glm.nb(out ~ files_count+thing_like_count+collection_count, data = license.df))
 plot(r01 + r02)
-save.image("Chunk5.RData")
+
 ```
 
 
