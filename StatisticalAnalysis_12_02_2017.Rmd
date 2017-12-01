@@ -260,6 +260,12 @@ library(stargazer)
 summary(m1)
 ```
 
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m2<- glm.nb(out ~ files_count+thing_like_count+collection_count+key.event, data = license.df)
+vuong(m1, m2)
+```
 
 ##4b. Model 2: the main effects of AS and LC: Private-collective  
 ```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
@@ -279,6 +285,12 @@ library(stargazer)
 summary(m2)
 ```
 
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m3<- glm.nb(out ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3, data = license.df)
+vuong(m2, m3)
+```
 
 ##4c. Model 3: testing the following two sets of interaction effects (H4, H5) 
 Appropriability strategy x Period (or key events):
@@ -296,6 +308,14 @@ library(pscl)
 library(stargazer)
 summary(m3)
 ```
+
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m1<- glm.nb(out ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event), data = license.df)
+vuong(m3, m1)
+```
+
 
 Note that by definition **Appropriability strategy = Design Strategy** so it does not make sense to test this interaction.
 
@@ -316,6 +336,13 @@ library(stargazer)
 summary(m1)
 ```
 
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m2<- glm.nb(made_count ~ files_count+thing_like_count+collection_count+key.event | files_count+thing_like_count+collection_count, data = license.df)
+vuong(m1, m2)
+```
+
 ##4b. Model 2: the main effects of AS and LC: Private-collective  
 ```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
 m2 <- zeroinfl(made_count ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3
@@ -329,6 +356,13 @@ load("Chunk21.RData")
 library(pscl)
 library(stargazer)
 summary(m2)
+```
+
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m1<- glm.nb(made_count ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3, data = license.df)
+vuong(m2, m1)
 ```
 
 
@@ -348,3 +382,9 @@ library(stargazer)
 summary(m3)
 ```
 
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m1<- glm.nbmade_count ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event), data = license.df)
+vuong(m3, m1)
+```
