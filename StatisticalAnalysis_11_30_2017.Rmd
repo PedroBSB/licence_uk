@@ -145,10 +145,11 @@ summary(m2)
 ##4c. Model 3: testing the following two sets of interaction effects (H4, H5) 
 Appropriability strategy x Period (or key events):
 ```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
-m3 <- zeroinfl(out ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event)+(appropriability_strategy*key.event)
-                 | files_count+thing_like_count+collection_count+appropriability_strategy+LC1+LC2+LC3, 
+m3 <- zeroinfl(out ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event)
+                 | files_count+thing_like_count+collection_count+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event), 
                data = license.df, dist = "negbin", EM = TRUE)
 summary(m3)
+save.image("Chunk19.RData")
 ```
 
 ```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
@@ -195,8 +196,8 @@ summary(m2)
 ##4c. Model 3: testing the following two sets of interaction effects (H4, H5) 
 Appropriability strategy x Period (or key events):
 ```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
-m3 <- zeroinfl(made_count ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event)+(appropriability_strategy*key.event)
-                 | files_count+thing_like_count+collection_count+appropriability_strategy+LC1+LC2+LC3, 
+m3 <- zeroinfl(made_count ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event)
+                 | files_count+thing_like_count+collection_count+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event), 
                data = license.df, dist = "negbin", EM = TRUE)
 summary(m3)
 ```

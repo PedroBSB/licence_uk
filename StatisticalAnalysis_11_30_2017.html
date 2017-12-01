@@ -747,8 +747,660 @@ levels(license.df$appropriability_strategy)[levels(license.df$appropriability_st
 ## LC2                        0        
 ## LC3                        0   0    
 ## appropriability_strategy   0   0   0</code></pre>
-<p>3b. Use a multinomial logistic regression with license choice as the dependent variable and use appropriability strategy to predict the choice of license choice (this provides a validity check that private-collective appropriability strategy is more likely to choose “attribution” (LC2), free-riding is more likely to choose antibusiness licenses (LC3), and private appropriability strategy is more likely to choose LC1. This provides testing of our first set of research hypotheses</p>
 </div>
+</div>
+<div id="b.-use-a-multinomial-logistic-regression-with-license-choice-as-the-dependent-variable-and-use-appropriability-strategy-to-predict-the-choice-of-license-choice-this-provides-a-validity-check-that-private-collective-appropriability-strategy-is-more-likely-to-choose-attribution-lc2-free-riding-is-more-likely-to-choose-antibusiness-licenses-lc3-and-private-appropriability-strategy-is-more-likely-to-choose-lc1.-this-provides-testing-of-our-first-set-of-research-hypotheses" class="section level2">
+<h2>3b. Use a multinomial logistic regression with license choice as the dependent variable and use appropriability strategy to predict the choice of license choice (this provides a validity check that private-collective appropriability strategy is more likely to choose “attribution” (LC2), free-riding is more likely to choose antibusiness licenses (LC3), and private appropriability strategy is more likely to choose LC1. This provides testing of our first set of research hypotheses</h2>
+<p>I did not used the <strong>multinomial logistic regression</strong> because license choice it is not a multinomial variable anymore. We aggregated the data and counted the number of times that license choice was found by <em>thing_author_id</em> and <em>key.event</em>. Instead of that, I ran a Multivariate multiple regression:</p>
+<pre><code>## Response LC1 :
+## 
+## Call:
+## lm(formula = LC1 ~ appropriability_strategy + key.event + comments_count + 
+##     collection_count + downloads_count + files_count + thing_like_count + 
+##     made_count + remix_count + remixed_froms_count + views_count + 
+##     tags_count, data = license.df)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -37.03  -0.31  -0.20  -0.16 133.12 
+## 
+## Coefficients:
+##                                        Estimate  Std. Error t value
+## (Intercept)                          0.48369344  0.03036390   15.93
+## appropriability_strategyfree-riding -0.29512172  0.02384384  -12.38
+## appropriability_strategyprivate     -0.28572052  0.02406626  -11.87
+## key.event2                          -0.03507025  0.02632174   -1.33
+## key.event3                          -0.04415788  0.02614224   -1.69
+## comments_count                       0.04186806  0.00114040   36.71
+## collection_count                     0.00134028  0.00023947    5.60
+## downloads_count                     -0.00010252  0.00000437  -23.44
+## files_count                          0.01379666  0.00071524   19.29
+## thing_like_count                     0.00003257  0.00027165    0.12
+## made_count                           0.00875801  0.00130584    6.71
+## remix_count                         -0.00196785  0.00012682  -15.52
+## remixed_froms_count                  0.04267007  0.00181486   23.51
+## views_count                         -0.00000557  0.00000130   -4.29
+## tags_count                           0.00278071  0.00035557    7.82
+##                                                 Pr(&gt;|t|)    
+## (Intercept)                         &lt; 0.0000000000000002 ***
+## appropriability_strategyfree-riding &lt; 0.0000000000000002 ***
+## appropriability_strategyprivate     &lt; 0.0000000000000002 ***
+## key.event2                                         0.183    
+## key.event3                                         0.091 .  
+## comments_count                      &lt; 0.0000000000000002 ***
+## collection_count                      0.0000000219487474 ***
+## downloads_count                     &lt; 0.0000000000000002 ***
+## files_count                         &lt; 0.0000000000000002 ***
+## thing_like_count                                   0.905    
+## made_count                            0.0000000000201227 ***
+## remix_count                         &lt; 0.0000000000000002 ***
+## remixed_froms_count                 &lt; 0.0000000000000002 ***
+## views_count                           0.0000181861568257 ***
+## tags_count                            0.0000000000000054 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 1.6 on 46587 degrees of freedom
+## Multiple R-squared:  0.248,  Adjusted R-squared:  0.248 
+## F-statistic: 1.1e+03 on 14 and 46587 DF,  p-value: &lt;0.0000000000000002
+## 
+## 
+## Response LC2 :
+## 
+## Call:
+## lm(formula = LC2 ~ appropriability_strategy + key.event + comments_count + 
+##     collection_count + downloads_count + files_count + thing_like_count + 
+##     made_count + remix_count + remixed_froms_count + views_count + 
+##     tags_count, data = license.df)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -66.71  -0.59  -0.16   0.24  52.05 
+## 
+## Coefficients:
+##                                        Estimate  Std. Error t value
+## (Intercept)                          2.34734075  0.03889626   60.35
+## appropriability_strategyfree-riding -2.00617568  0.03054405  -65.68
+## appropriability_strategyprivate     -1.57909535  0.03082897  -51.22
+## key.event2                           0.39987041  0.03371824   11.86
+## key.event3                           0.41543536  0.03348829   12.41
+## comments_count                      -0.00110107  0.00146086   -0.75
+## collection_count                     0.00014864  0.00030676    0.48
+## downloads_count                     -0.00001371  0.00000560   -2.45
+## files_count                          0.05293335  0.00091623   57.77
+## thing_like_count                     0.00072884  0.00034798    2.09
+## made_count                          -0.02497468  0.00167279  -14.93
+## remix_count                         -0.00331790  0.00016246  -20.42
+## remixed_froms_count                  0.18050347  0.00232485   77.64
+## views_count                          0.00003833  0.00000166   23.03
+## tags_count                          -0.00893810  0.00045549  -19.62
+##                                                Pr(&gt;|t|)    
+## (Intercept)                         &lt;0.0000000000000002 ***
+## appropriability_strategyfree-riding &lt;0.0000000000000002 ***
+## appropriability_strategyprivate     &lt;0.0000000000000002 ***
+## key.event2                          &lt;0.0000000000000002 ***
+## key.event3                          &lt;0.0000000000000002 ***
+## comments_count                                    0.451    
+## collection_count                                  0.628    
+## downloads_count                                   0.014 *  
+## files_count                         &lt;0.0000000000000002 ***
+## thing_like_count                                  0.036 *  
+## made_count                          &lt;0.0000000000000002 ***
+## remix_count                         &lt;0.0000000000000002 ***
+## remixed_froms_count                 &lt;0.0000000000000002 ***
+## views_count                         &lt;0.0000000000000002 ***
+## tags_count                          &lt;0.0000000000000002 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 2 on 46587 degrees of freedom
+## Multiple R-squared:  0.541,  Adjusted R-squared:  0.54 
+## F-statistic: 3.91e+03 on 14 and 46587 DF,  p-value: &lt;0.0000000000000002
+## 
+## 
+## Response LC3 :
+## 
+## Call:
+## lm(formula = LC3 ~ appropriability_strategy + key.event + comments_count + 
+##     collection_count + downloads_count + files_count + thing_like_count + 
+##     made_count + remix_count + remixed_froms_count + views_count + 
+##     tags_count, data = license.df)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -14.23  -0.07  -0.04  -0.01  60.96 
+## 
+## Coefficients:
+##                                         Estimate   Std. Error t value
+## (Intercept)                          0.393698107  0.016084696   24.48
+## appropriability_strategyfree-riding -0.140070462  0.012630822  -11.09
+## appropriability_strategyprivate     -0.178563920  0.012748644  -14.01
+## key.event2                          -0.227291685  0.013943440  -16.30
+## key.event3                          -0.212751858  0.013848351  -15.36
+## comments_count                       0.022252155  0.000604105   36.83
+## collection_count                    -0.001279690  0.000126855  -10.09
+## downloads_count                      0.000063977  0.000002317   27.62
+## files_count                         -0.000831655  0.000378886   -2.19
+## thing_like_count                    -0.000209425  0.000143900   -1.46
+## made_count                           0.002039496  0.000691746    2.95
+## remix_count                         -0.000402734  0.000067182   -5.99
+## remixed_froms_count                 -0.000618934  0.000961390   -0.64
+## views_count                         -0.000000544  0.000000688   -0.79
+## tags_count                           0.002367809  0.000188358   12.57
+##                                                 Pr(&gt;|t|)    
+## (Intercept)                         &lt; 0.0000000000000002 ***
+## appropriability_strategyfree-riding &lt; 0.0000000000000002 ***
+## appropriability_strategyprivate     &lt; 0.0000000000000002 ***
+## key.event2                          &lt; 0.0000000000000002 ***
+## key.event3                          &lt; 0.0000000000000002 ***
+## comments_count                      &lt; 0.0000000000000002 ***
+## collection_count                    &lt; 0.0000000000000002 ***
+## downloads_count                     &lt; 0.0000000000000002 ***
+## files_count                                       0.0282 *  
+## thing_like_count                                  0.1456    
+## made_count                                        0.0032 ** 
+## remix_count                                 0.0000000021 ***
+## remixed_froms_count                               0.5197    
+## views_count                                       0.4290    
+## tags_count                          &lt; 0.0000000000000002 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.85 on 46587 degrees of freedom
+## Multiple R-squared:  0.192,  Adjusted R-squared:  0.192 
+## F-statistic:  791 on 14 and 46587 DF,  p-value: &lt;0.0000000000000002</code></pre>
+<p>Manova results:</p>
+<pre><code>##                             Df Pillai approx F num Df den Df
+## appropriability_strategy     2  0.392     3784      6  93172
+## key.event                    2  0.038      301      6  93172
+## comments_count               1  0.489    14874      3  46585
+## collection_count             1  0.028      447      3  46585
+## downloads_count              1  0.074     1248      3  46585
+## files_count                  1  0.353     8479      3  46585
+## thing_like_count             1  0.000        8      3  46585
+## made_count                   1  0.003       45      3  46585
+## remix_count                  1  0.016      250      3  46585
+## remixed_froms_count          1  0.174     3272      3  46585
+## views_count                  1  0.010      156      3  46585
+## tags_count                   1  0.011      167      3  46585
+## Residuals                46587                              
+##                                        Pr(&gt;F)    
+## appropriability_strategy &lt; 0.0000000000000002 ***
+## key.event                &lt; 0.0000000000000002 ***
+## comments_count           &lt; 0.0000000000000002 ***
+## collection_count         &lt; 0.0000000000000002 ***
+## downloads_count          &lt; 0.0000000000000002 ***
+## files_count              &lt; 0.0000000000000002 ***
+## thing_like_count                      0.00004 ***
+## made_count               &lt; 0.0000000000000002 ***
+## remix_count              &lt; 0.0000000000000002 ***
+## remixed_froms_count      &lt; 0.0000000000000002 ***
+## views_count              &lt; 0.0000000000000002 ***
+## tags_count               &lt; 0.0000000000000002 ***
+## Residuals                                        
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<div id="use-the-zero-inflated-neg-binomial-zinb-for-modelling-the-effects-on-out." class="section level1">
+<h1>4. Use the zero inflated neg binomial (zinb) for modelling the effects on “out”.</h1>
+<div id="a.-model-1-the-usual-control-variables-files-count-likes-period-and-perhaps-collection" class="section level2">
+<h2>4a. Model 1: the usual control variables (files count, likes, period and perhaps collection)</h2>
+<pre class="r"><code>library(pscl)
+m1 &lt;- zeroinfl(out ~ files_count+thing_like_count+collection_count+key.event | files_count+thing_like_count+collection_count, 
+               data = license.df, dist = &quot;negbin&quot;, EM = TRUE)
+summary(m1)</code></pre>
+<pre><code>## 
+## Call:
+## zeroinfl(formula = out ~ files_count + thing_like_count + collection_count + 
+##     key.event | files_count + thing_like_count + collection_count, 
+##     data = license.df, dist = &quot;negbin&quot;, EM = TRUE)
+## 
+## Pearson residuals:
+##      Min       1Q   Median       3Q      Max 
+##  -0.4780  -0.1433  -0.0692  -0.0643 158.3929 
+## 
+## Count model coefficients (negbin with log link):
+##                   Estimate Std. Error z value             Pr(&gt;|z|)    
+## (Intercept)      -0.226475   0.048250   -4.69        0.00000268187 ***
+## files_count       0.004659   0.001090    4.27        0.00001924789 ***
+## thing_like_count -0.002002   0.000431   -4.64        0.00000344735 ***
+## collection_count  0.005136   0.000385   13.34 &lt; 0.0000000000000002 ***
+## key.event2        0.993629   0.051800   19.18 &lt; 0.0000000000000002 ***
+## key.event3        0.351567   0.056937    6.17        0.00000000066 ***
+## Log(theta)       -1.476153   0.020821  -70.90 &lt; 0.0000000000000002 ***
+## 
+## Zero-inflation model coefficients (binomial with logit link):
+##                  Estimate Std. Error z value            Pr(&gt;|z|)    
+## (Intercept)       3.62991    0.06090   59.61 &lt;0.0000000000000002 ***
+## files_count       0.00265    0.00223    1.19                0.23    
+## thing_like_count -0.00403    0.00990   -0.41                0.68    
+## collection_count -0.14980    0.00965  -15.52 &lt;0.0000000000000002 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+## 
+## Theta = 0.229 
+## Number of iterations in BFGS optimization: 1 
+## Log-likelihood: -2.38e+04 on 11 Df</code></pre>
+</div>
+<div id="b.-model-2-the-main-effects-of-as-and-lc-private-collective" class="section level2">
+<h2>4b. Model 2: the main effects of AS and LC: Private-collective</h2>
+<pre class="r"><code>#Define the reference (Private-collective)
+license.df &lt;- within(license.df, appropriability_strategy &lt;- relevel(appropriability_strategy, ref = &quot;private-collective&quot;))
+m2 &lt;- zeroinfl(out ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3
+                 | files_count+thing_like_count+collection_count+appropriability_strategy+LC1+LC2+LC3, 
+               data = license.df, dist = &quot;negbin&quot;, EM = TRUE)
+save.image(&quot;Chunk18.RData&quot;)
+summary(m2)</code></pre>
+<pre><code>## 
+## Call:
+## zeroinfl(formula = out ~ files_count + thing_like_count + collection_count + 
+##     key.event + appropriability_strategy + LC1 + LC2 + LC3 | files_count + 
+##     thing_like_count + collection_count + appropriability_strategy + 
+##     LC1 + LC2 + LC3, data = license.df, dist = &quot;negbin&quot;, EM = TRUE)
+## 
+## Pearson residuals:
+##      Min       1Q   Median       3Q      Max 
+##  -0.4925  -0.1571  -0.0759  -0.0540 243.8804 
+## 
+## Count model coefficients (negbin with log link):
+##                                      Estimate Std. Error z value
+## (Intercept)                          0.173516   0.065543    2.65
+## files_count                         -0.002080   0.000574   -3.62
+## thing_like_count                    -0.001000   0.000407   -2.46
+## collection_count                     0.003839   0.000358   10.71
+## key.event2                           0.909291   0.052035   17.47
+## key.event3                           0.212982   0.057344    3.71
+## appropriability_strategyfree-riding  0.077141   0.081486    0.95
+## appropriability_strategyprivate     -0.722803   0.051323  -14.08
+## LC1                                  0.007323   0.008292    0.88
+## LC2                                  0.038883   0.006951    5.59
+## LC3                                  0.055356   0.016997    3.26
+## Log(theta)                          -1.416691   0.021133  -67.04
+##                                                 Pr(&gt;|z|)    
+## (Intercept)                                      0.00811 ** 
+## files_count                                      0.00029 ***
+## thing_like_count                                 0.01401 *  
+## collection_count                    &lt; 0.0000000000000002 ***
+## key.event2                          &lt; 0.0000000000000002 ***
+## key.event3                                       0.00020 ***
+## appropriability_strategyfree-riding              0.34380    
+## appropriability_strategyprivate     &lt; 0.0000000000000002 ***
+## LC1                                              0.37715    
+## LC2                                          0.000000022 ***
+## LC3                                              0.00113 ** 
+## Log(theta)                          &lt; 0.0000000000000002 ***
+## 
+## Zero-inflation model coefficients (binomial with logit link):
+##                                     Estimate Std. Error z value
+## (Intercept)                          2.45106    0.14264   17.18
+## files_count                         -0.01248    0.00902   -1.38
+## thing_like_count                     0.00652    0.00967    0.67
+## collection_count                    -0.14185    0.00955  -14.86
+## appropriability_strategyfree-riding  1.50310    0.13509   11.13
+## appropriability_strategyprivate      0.63249    0.12839    4.93
+## LC1                                  0.21423    0.05872    3.65
+## LC2                                  0.13724    0.03342    4.11
+## LC3                                 -0.22521    0.12187   -1.85
+##                                                 Pr(&gt;|z|)    
+## (Intercept)                         &lt; 0.0000000000000002 ***
+## files_count                                      0.16624    
+## thing_like_count                                 0.50004    
+## collection_count                    &lt; 0.0000000000000002 ***
+## appropriability_strategyfree-riding &lt; 0.0000000000000002 ***
+## appropriability_strategyprivate               0.00000084 ***
+## LC1                                              0.00026 ***
+## LC2                                           0.00004024 ***
+## LC3                                              0.06461 .  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+## 
+## Theta = 0.243 
+## Number of iterations in BFGS optimization: 24 
+## Log-likelihood: -2.35e+04 on 21 Df</code></pre>
+</div>
+<div id="c.-model-3-testing-the-following-two-sets-of-interaction-effects-h4-h5" class="section level2">
+<h2>4c. Model 3: testing the following two sets of interaction effects (H4, H5)</h2>
+<p>Appropriability strategy x Period (or key events):</p>
+<pre class="r"><code>m3 &lt;- zeroinfl(out ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event)
+                 | files_count+thing_like_count+collection_count+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event), 
+               data = license.df, dist = &quot;negbin&quot;, EM = TRUE)
+summary(m3)
+save.image(&quot;Chunk19.RData&quot;)</code></pre>
+<pre><code>## 
+## Call:
+## zeroinfl(formula = out ~ files_count + thing_like_count + collection_count + 
+##     key.event + appropriability_strategy + LC1 + LC2 + LC3 + (appropriability_strategy * 
+##     key.event) | files_count + thing_like_count + collection_count + 
+##     appropriability_strategy + LC1 + LC2 + LC3 + (appropriability_strategy * 
+##     key.event), data = license.df, dist = &quot;negbin&quot;, EM = TRUE)
+## 
+## Pearson residuals:
+##      Min       1Q   Median       3Q      Max 
+##  -0.5101  -0.1561  -0.0745  -0.0440 224.9917 
+## 
+## Count model coefficients (negbin with log link):
+##                                                 Estimate Std. Error
+## (Intercept)                                     0.055570   0.075772
+## files_count                                    -0.001796   0.000527
+## thing_like_count                               -0.001169   0.000404
+## collection_count                                0.003846   0.000356
+## key.event2                                      1.184901   0.080190
+## key.event3                                      0.492989   0.091354
+## appropriability_strategyfree-riding            -0.018439   0.164165
+## appropriability_strategyprivate                -0.572184   0.085521
+## LC1                                             0.005241   0.008047
+## LC2                                             0.033054   0.006746
+## LC3                                             0.055948   0.016249
+## key.event2:appropriability_strategyfree-riding -0.459829   0.195198
+## key.event3:appropriability_strategyfree-riding  0.666429   0.217597
+## key.event2:appropriability_strategyprivate     -0.169744   0.107877
+## key.event3:appropriability_strategyprivate     -0.201577   0.119898
+## Log(theta)                                     -1.346423   0.021705
+##                                                z value
+## (Intercept)                                       0.73
+## files_count                                      -3.41
+## thing_like_count                                 -2.90
+## collection_count                                 10.82
+## key.event2                                       14.78
+## key.event3                                        5.40
+## appropriability_strategyfree-riding              -0.11
+## appropriability_strategyprivate                  -6.69
+## LC1                                               0.65
+## LC2                                               4.90
+## LC3                                               3.44
+## key.event2:appropriability_strategyfree-riding   -2.36
+## key.event3:appropriability_strategyfree-riding    3.06
+## key.event2:appropriability_strategyprivate       -1.57
+## key.event3:appropriability_strategyprivate       -1.68
+## Log(theta)                                      -62.03
+##                                                            Pr(&gt;|z|)    
+## (Intercept)                                                 0.46332    
+## files_count                                                 0.00066 ***
+## thing_like_count                                            0.00378 ** 
+## collection_count                               &lt; 0.0000000000000002 ***
+## key.event2                                     &lt; 0.0000000000000002 ***
+## key.event3                                           0.000000067970 ***
+## appropriability_strategyfree-riding                         0.91057    
+## appropriability_strategyprivate                      0.000000000022 ***
+## LC1                                                         0.51485    
+## LC2                                                  0.000000960413 ***
+## LC3                                                         0.00057 ***
+## key.event2:appropriability_strategyfree-riding              0.01849 *  
+## key.event3:appropriability_strategyfree-riding              0.00219 ** 
+## key.event2:appropriability_strategyprivate                  0.11560    
+## key.event3:appropriability_strategyprivate                  0.09272 .  
+## Log(theta)                                     &lt; 0.0000000000000002 ***
+## 
+## Zero-inflation model coefficients (binomial with logit link):
+##                                                Estimate Std. Error z value
+## (Intercept)                                     0.00131    0.74603    0.00
+## files_count                                    -0.01531    0.00797   -1.92
+## thing_like_count                                0.00135    0.00777    0.17
+## collection_count                               -0.10599    0.00763  -13.90
+## appropriability_strategyfree-riding             1.30768    0.80670    1.62
+## appropriability_strategyprivate                 2.07342    0.75076    2.76
+## LC1                                             0.18495    0.05126    3.61
+## LC2                                             0.08096    0.03014    2.69
+## LC3                                            -0.18063    0.11156   -1.62
+## key.event2                                      2.35678    0.75076    3.14
+## key.event3                                      2.74336    0.75190    3.65
+## appropriability_strategyfree-riding:key.event2  0.01376    0.82035    0.02
+## appropriability_strategyprivate:key.event2     -1.32937    0.76411   -1.74
+## appropriability_strategyfree-riding:key.event3  0.49556    0.82431    0.60
+## appropriability_strategyprivate:key.event3     -1.51914    0.76718   -1.98
+##                                                            Pr(&gt;|z|)    
+## (Intercept)                                                 0.99860    
+## files_count                                                 0.05460 .  
+## thing_like_count                                            0.86160    
+## collection_count                               &lt; 0.0000000000000002 ***
+## appropriability_strategyfree-riding                         0.10501    
+## appropriability_strategyprivate                             0.00575 ** 
+## LC1                                                         0.00031 ***
+## LC2                                                         0.00723 ** 
+## LC3                                                         0.10540    
+## key.event2                                                  0.00169 ** 
+## key.event3                                                  0.00026 ***
+## appropriability_strategyfree-riding:key.event2              0.98662    
+## appropriability_strategyprivate:key.event2                  0.08190 .  
+## appropriability_strategyfree-riding:key.event3              0.54772    
+## appropriability_strategyprivate:key.event3                  0.04769 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+## 
+## Theta = 0.26 
+## Number of iterations in BFGS optimization: 36 
+## Log-likelihood: -2.34e+04 on 31 Df</code></pre>
+<p>Note that by definition <strong>Appropriability strategy = Design Strategy</strong> so it does not make sense to test this interaction.</p>
+</div>
+</div>
+<div id="repeat-the-above-steps-with-the-outcome-measure-made." class="section level1">
+<h1>Repeat the above steps with the outcome measure: “made”.</h1>
+<div id="a.-model-1-the-usual-control-variables-files-count-likes-period-and-perhaps-collection-1" class="section level2">
+<h2>4a. Model 1: the usual control variables (files count, likes, period and perhaps collection)</h2>
+<pre class="r"><code>library(pscl)
+m1 &lt;- zeroinfl(made_count ~ files_count+thing_like_count+collection_count+key.event | files_count+thing_like_count+collection_count, 
+               data = license.df, dist = &quot;negbin&quot;, EM = TRUE)
+summary(m1)</code></pre>
+<pre><code>## 
+## Call:
+## zeroinfl(formula = made_count ~ files_count + thing_like_count + 
+##     collection_count + key.event | files_count + thing_like_count + 
+##     collection_count, data = license.df, dist = &quot;negbin&quot;, EM = TRUE)
+## 
+## Pearson residuals:
+##    Min     1Q Median     3Q    Max 
+## -0.859 -0.189 -0.111 -0.104 65.935 
+## 
+## Count model coefficients (negbin with log link):
+##                   Estimate Std. Error z value            Pr(&gt;|z|)    
+## (Intercept)       0.693751   0.027881   24.88 &lt;0.0000000000000002 ***
+## files_count       0.000120   0.000459    0.26              0.7936    
+## thing_like_count  0.000852   0.000271    3.14              0.0017 ** 
+## collection_count  0.002919   0.000227   12.88 &lt;0.0000000000000002 ***
+## key.event2       -0.485866   0.029036  -16.73 &lt;0.0000000000000002 ***
+## key.event3       -0.822668   0.031754  -25.91 &lt;0.0000000000000002 ***
+## Log(theta)       -0.303336   0.020800  -14.58 &lt;0.0000000000000002 ***
+## 
+## Zero-inflation model coefficients (binomial with logit link):
+##                  Estimate Std. Error z value             Pr(&gt;|z|)    
+## (Intercept)       3.24532    0.04867   66.68 &lt; 0.0000000000000002 ***
+## files_count      -0.00497    0.00474   -1.05                 0.29    
+## thing_like_count -0.05752    0.00956   -6.02         0.0000000018 ***
+## collection_count -0.15783    0.00918  -17.19 &lt; 0.0000000000000002 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+## 
+## Theta = 0.738 
+## Number of iterations in BFGS optimization: 1 
+## Log-likelihood: -3.17e+04 on 11 Df</code></pre>
+</div>
+<div id="b.-model-2-the-main-effects-of-as-and-lc-private-collective-1" class="section level2">
+<h2>4b. Model 2: the main effects of AS and LC: Private-collective</h2>
+<pre class="r"><code>m2 &lt;- zeroinfl(made_count ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3
+                 | files_count+thing_like_count+collection_count+appropriability_strategy+LC1+LC2+LC3, 
+               data = license.df, dist = &quot;negbin&quot;, EM = TRUE)
+summary(m2)</code></pre>
+<pre><code>## 
+## Call:
+## zeroinfl(formula = made_count ~ files_count + thing_like_count + 
+##     collection_count + key.event + appropriability_strategy + LC1 + 
+##     LC2 + LC3 | files_count + thing_like_count + collection_count + 
+##     appropriability_strategy + LC1 + LC2 + LC3, data = license.df, 
+##     dist = &quot;negbin&quot;, EM = TRUE)
+## 
+## Pearson residuals:
+##     Min      1Q  Median      3Q     Max 
+## -0.8845 -0.2078 -0.1032 -0.0894 53.1197 
+## 
+## Count model coefficients (negbin with log link):
+##                                      Estimate Std. Error z value
+## (Intercept)                          0.889379   0.036252   24.53
+## files_count                         -0.003517   0.000433   -8.12
+## thing_like_count                     0.000903   0.000262    3.45
+## collection_count                     0.002463   0.000215   11.43
+## key.event2                          -0.520766   0.029372  -17.73
+## key.event3                          -0.864928   0.032050  -26.99
+## appropriability_strategyfree-riding -0.341286   0.047819   -7.14
+## appropriability_strategyprivate     -0.275991   0.028252   -9.77
+## LC1                                  0.027608   0.005183    5.33
+## LC2                                  0.028485   0.003805    7.49
+## LC3                                  0.025550   0.008363    3.06
+## Log(theta)                          -0.245444   0.021120  -11.62
+##                                                 Pr(&gt;|z|)    
+## (Intercept)                         &lt; 0.0000000000000002 ***
+## files_count                          0.00000000000000045 ***
+## thing_like_count                                 0.00056 ***
+## collection_count                    &lt; 0.0000000000000002 ***
+## key.event2                          &lt; 0.0000000000000002 ***
+## key.event3                          &lt; 0.0000000000000002 ***
+## appropriability_strategyfree-riding  0.00000000000095377 ***
+## appropriability_strategyprivate     &lt; 0.0000000000000002 ***
+## LC1                                  0.00000009989433916 ***
+## LC2                                  0.00000000000007064 ***
+## LC3                                              0.00225 ** 
+## Log(theta)                          &lt; 0.0000000000000002 ***
+## 
+## Zero-inflation model coefficients (binomial with logit link):
+##                                     Estimate Std. Error z value
+## (Intercept)                          2.75101    0.11408   24.11
+## files_count                          0.00191    0.00156    1.23
+## thing_like_count                    -0.03873    0.00867   -4.47
+## collection_count                    -0.13738    0.00837  -16.41
+## appropriability_strategyfree-riding  0.85269    0.10943    7.79
+## appropriability_strategyprivate      0.06617    0.10253    0.65
+## LC1                                  0.07521    0.04205    1.79
+## LC2                                 -0.08256    0.01971   -4.19
+## LC3                                 -0.04961    0.09097   -0.55
+##                                                 Pr(&gt;|z|)    
+## (Intercept)                         &lt; 0.0000000000000002 ***
+## files_count                                        0.220    
+## thing_like_count                      0.0000079871733200 ***
+## collection_count                    &lt; 0.0000000000000002 ***
+## appropriability_strategyfree-riding   0.0000000000000066 ***
+## appropriability_strategyprivate                    0.519    
+## LC1                                                0.074 .  
+## LC2                                   0.0000280046303917 ***
+## LC3                                                0.586    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+## 
+## Theta = 0.782 
+## Number of iterations in BFGS optimization: 1 
+## Log-likelihood: -3.15e+04 on 21 Df</code></pre>
+</div>
+<div id="c.-model-3-testing-the-following-two-sets-of-interaction-effects-h4-h5-1" class="section level2">
+<h2>4c. Model 3: testing the following two sets of interaction effects (H4, H5)</h2>
+<p>Appropriability strategy x Period (or key events):</p>
+<pre class="r"><code>m3 &lt;- zeroinfl(made_count ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event)
+                 | files_count+thing_like_count+collection_count+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event), 
+               data = license.df, dist = &quot;negbin&quot;, EM = TRUE)
+summary(m3)</code></pre>
+<pre><code>## 
+## Call:
+## zeroinfl(formula = made_count ~ files_count + thing_like_count + 
+##     collection_count + key.event + appropriability_strategy + LC1 + 
+##     LC2 + LC3 + (appropriability_strategy * key.event) | files_count + 
+##     thing_like_count + collection_count + appropriability_strategy + 
+##     LC1 + LC2 + LC3 + (appropriability_strategy * key.event), data = license.df, 
+##     dist = &quot;negbin&quot;, EM = TRUE)
+## 
+## Pearson residuals:
+##     Min      1Q  Median      3Q     Max 
+## -0.8874 -0.2106 -0.1008 -0.0869 51.7935 
+## 
+## Count model coefficients (negbin with log link):
+##                                                 Estimate Std. Error
+## (Intercept)                                     0.906793   0.044959
+## files_count                                    -0.003528   0.000433
+## thing_like_count                                0.000879   0.000262
+## collection_count                                0.002472   0.000216
+## key.event2                                     -0.558565   0.047799
+## key.event3                                     -0.846955   0.053104
+## appropriability_strategyfree-riding            -0.274907   0.098987
+## appropriability_strategyprivate                -0.303440   0.049241
+## LC1                                             0.027481   0.005173
+## LC2                                             0.028504   0.003803
+## LC3                                             0.025409   0.008378
+## key.event2:appropriability_strategyfree-riding  0.008101   0.118119
+## key.event3:appropriability_strategyfree-riding -0.261579   0.129580
+## key.event2:appropriability_strategyprivate      0.077868   0.062407
+## key.event3:appropriability_strategyprivate     -0.013146   0.067554
+## Log(theta)                                     -0.238927   0.021235
+##                                                z value
+## (Intercept)                                      20.17
+## files_count                                      -8.16
+## thing_like_count                                  3.35
+## collection_count                                 11.45
+## key.event2                                      -11.69
+## key.event3                                      -15.95
+## appropriability_strategyfree-riding              -2.78
+## appropriability_strategyprivate                  -6.16
+## LC1                                               5.31
+## LC2                                               7.50
+## LC3                                               3.03
+## key.event2:appropriability_strategyfree-riding    0.07
+## key.event3:appropriability_strategyfree-riding   -2.02
+## key.event2:appropriability_strategyprivate        1.25
+## key.event3:appropriability_strategyprivate       -0.19
+## Log(theta)                                      -11.25
+##                                                            Pr(&gt;|z|)    
+## (Intercept)                                    &lt; 0.0000000000000002 ***
+## files_count                                     0.00000000000000034 ***
+## thing_like_count                                            0.00081 ***
+## collection_count                               &lt; 0.0000000000000002 ***
+## key.event2                                     &lt; 0.0000000000000002 ***
+## key.event3                                     &lt; 0.0000000000000002 ***
+## appropriability_strategyfree-riding                         0.00548 ** 
+## appropriability_strategyprivate                 0.00000000071701158 ***
+## LC1                                             0.00000010815217792 ***
+## LC2                                             0.00000000000006614 ***
+## LC3                                                         0.00242 ** 
+## key.event2:appropriability_strategyfree-riding              0.94532    
+## key.event3:appropriability_strategyfree-riding              0.04352 *  
+## key.event2:appropriability_strategyprivate                  0.21213    
+## key.event3:appropriability_strategyprivate                  0.84571    
+## Log(theta)                                     &lt; 0.0000000000000002 ***
+## 
+## Zero-inflation model coefficients (binomial with logit link):
+##                                                Estimate Std. Error z value
+## (Intercept)                                     2.62786    0.35681    7.36
+## files_count                                     0.00193    0.00154    1.25
+## thing_like_count                               -0.03574    0.00850   -4.20
+## collection_count                               -0.13406    0.00839  -15.98
+## appropriability_strategyfree-riding            -0.54282    0.44580   -1.22
+## appropriability_strategyprivate                 0.32087    0.36067    0.89
+## LC1                                             0.06113    0.04196    1.46
+## LC2                                            -0.08663    0.01989   -4.36
+## LC3                                            -0.06679    0.09067   -0.74
+## key.event2                                      0.03080    0.37392    0.08
+## key.event3                                      0.19207    0.37089    0.52
+## appropriability_strategyfree-riding:key.event2  1.55804    0.47113    3.31
+## appropriability_strategyprivate:key.event2     -0.12344    0.38918   -0.32
+## appropriability_strategyfree-riding:key.event3  1.32510    0.46941    2.82
+## appropriability_strategyprivate:key.event3     -0.50246    0.38542   -1.30
+##                                                            Pr(&gt;|z|)    
+## (Intercept)                                        0.00000000000018 ***
+## files_count                                                 0.21098    
+## thing_like_count                                   0.00002610955094 ***
+## collection_count                               &lt; 0.0000000000000002 ***
+## appropriability_strategyfree-riding                         0.22336    
+## appropriability_strategyprivate                             0.37366    
+## LC1                                                         0.14515    
+## LC2                                                0.00001323615769 ***
+## LC3                                                         0.46134    
+## key.event2                                                  0.93436    
+## key.event3                                                  0.60455    
+## appropriability_strategyfree-riding:key.event2              0.00094 ***
+## appropriability_strategyprivate:key.event2                  0.75110    
+## appropriability_strategyfree-riding:key.event3              0.00476 ** 
+## appropriability_strategyprivate:key.event3                  0.19234    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+## 
+## Theta = 0.787 
+## Number of iterations in BFGS optimization: 1 
+## Log-likelihood: -3.14e+04 on 31 Df</code></pre>
 </div>
 </div>
 
