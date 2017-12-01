@@ -1,0 +1,390 @@
+---
+title: "Statistical Analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Revised model.
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE, results='asis'}
+library(xtable)
+library(MASS)
+library(knitr)
+library(pscl)
+library(stargazer)
+library(tidyverse)
+library(pastecs)
+library(gmodels)
+```
+
+```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Read the dataset
+license.df<-read.csv("Data/AggreatedData.csv")
+license.df<-na.omit(license.df)
+license.df$key.event<-as.factor(license.df$key.event)
+license.df <- within(license.df, key.event <- relevel(key.event, ref = "1"))
+
+#1. Rename ES to “license_choice” and then recode ES1 & ES3 as LC1 (label: no_derivative), ES2 as LC2 (attribution), ES4 as LC3 (antibusiness)
+license.df <- license.df %>% 
+                  mutate(LC1 = ES1+ES3,
+                         LC2 = ES2,
+                         LC3 = ES4) %>% 
+                  select(-ES1,-ES2,-ES3,-ES4)
+
+
+#2. Rename design_strategy as “appropriability_strategy” and recode blended strategy as “private-collective”, and the others remain the same. 
+license.df <- license.df %>% 
+              rename(appropriability_strategy = design.strategy)
+
+levels(license.df$appropriability_strategy)[levels(license.df$appropriability_strategy)=="blended"] <- "private-collective"
+```
+
+
+#3. Test the relationship between appropriability strategy (AS) and license choice (LC)
+##3a. First provide a table of descriptive statistics, and include a bivariate correlation table with all the variables used in the analysis, comment the relationship between appropriability strategy and license choice
+
+###Descriptive statistics.
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+options(scipen=100)
+options(digits=2)
+temp <- license.df %>% 
+        select(-thing_author_id,-key.event,-appropriability_strategy)
+tt<-stat.desc(temp)
+kable(tt)
+```
+
+All variables used in this previous descriptive statistics are interval quantitative variables measure the number of counts. **Key.event** and **appropriability_strategy** are nominal qualitative variables and they are used as *factors* in our model, in other words, the model converts those variables in *dummy* variables with a reference.
+
+
+###Frequency Table between Key Event and Appropriability Strategy.
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+CrossTable(license.df$key.event, license.df$appropriability_strategy)
+```
+
+
+###Bivariate correlation table with all the variables used in the analysis.
+The variables "out","made_count","LC1","LC2","LC3","collection_count","files_count","thing_like_count","views_count" and "tags_count" are all quantitative variables, so the straightforward correlation approach is applying the usual **Pearson correlation**.
+
+All variables have positive correlation between each other and all correlations were statistically significant under $\alpha=0.01$.
+
+The highest correlation is between *thing_like_count* and *collection_count*, followed by *collection_count* and * views_count* and also *thing_like_count* and *views_count*.
+
+The smallest correlation was between *out* and *LC3* which was near to zero but positively significant. In fact, *out* presented a small correlation for all *LC1,LC2* and *LC3*. In the other hand, *made_count* was more positively correlated with *LC1,LC2* and *LC3* than *out*.
+
+ 
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+temp<-temp[,c("out","made_count","LC1","LC2","LC3","collection_count","files_count","thing_like_count","views_count","tags_count")]
+res <- cor(temp)
+#library(Hmisc) 
+#temp2<-apply(temp,2,as.double)
+#rcorr(temp2, type="pearson")
+kable(round(res, 4))
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+library(corrplot)
+corrplot(res, type = "upper",  tl.col = "black", tl.srt = 45)
+```
+
+###Heterogeneous Correlation Matrix.
+Correlation between qualitative and quantitative variables such as **appropriability strategy** and **license choice**.
+
+```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+library(sjstats)
+etaCor<-matrix(1,3,1)
+rownames(etaCor)<-c("LC1","LC2","LC3")
+colnames(etaCor)<-c("appropriability_strategy")
+
+temp <- license.df %>% 
+        mutate(LC1= ifelse(LC1>0,1,0),
+               LC2 =ifelse(LC2>0,1,0),
+               LC3=ifelse(LC3>0,1,0)) %>% 
+        select(LC1,LC2,LC3, appropriability_strategy)
+
+
+#ETA-squared
+eta1 <- aov(LC1 ~ appropriability_strategy, temp) 
+eta2 <- aov(LC2 ~ appropriability_strategy, temp) 
+eta3 <- aov(LC2 ~ appropriability_strategy, temp) 
+etaCor[1,1]<- (eta_sq(eta1))
+etaCor[2,1]<- (eta_sq(eta2))
+etaCor[3,1]<- (eta_sq(eta3))
+kable(etaCor)
+```
+
+Since the *appropriability_strategy* is a nominal qualitative variable, the best way to measure the correlation between interval variables such as *LC1,LC2,LC3* and *appropriability_strategy* is using **eta-squared** 
+
+This measure of correlation has values between 0 and 1 and for the results above, only 2% of the variability of LC1 is explained by the categories in *appropriability_strategy*. For LC2 and LC3 the amount of variability explained by *appropriability_strategy* is 1% respectively.
+
+
+##3b. Use a multinomial logistic regression with license choice as the dependent variable and use appropriability strategy to predict the choice of license choice (this provides a validity check that private-collective  appropriability strategy is more likely to choose “attribution” (LC2), free-riding is more likely to choose antibusiness licenses (LC3), and private appropriability strategy is more likely to choose LC1. This provides testing of our first set of research hypotheses
+
+I did not used the **multinomial logistic regression** because license choice it is not a multinomial variable anymore. We aggregated the data and counted the number of times that license choice was found by *thing_author_id* and *key.event*. Instead of that, I ran a Multivariate multiple regression:
+
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+library(broom)
+my.model <- lm(cbind(LC1,LC2,LC3) ~ appropriability_strategy+key.event+collection_count+
+                                    files_count+thing_like_count+made_count
+                                    ,data=license.df) 
+
+coef<-tidy(my.model)
+table1<-coef[,c(1,2,3)]
+table1<- table1 %>%
+         spread(response, estimate) 
+colnames(table1)[1]<-"Coefficients"
+kable(table1)
+
+table2<-coef[,c(1,2,4)]
+table2<- table2 %>%
+         spread(response, std.error) 
+colnames(table2)[1]<-"Std. Error"
+kable(table2)
+
+table3<-coef[,c(1,2,5)]
+table3<- table3 %>%
+         spread(response, statistic) 
+colnames(table3)[1]<-"Z-value"
+kable(table3)
+
+table4<-coef[,c(1,2,6)]
+table4<- table4 %>%
+         spread(response, p.value) 
+colnames(table4)[1]<-"P-value"
+kable(table4)
+```
+
+The **LC1** model presents Multiple R-squared:  0.248 and	Adjusted R-squared:  0.248. The **LC2** model presents
+Multiple R-squared:  0.541,	Adjusted R-squared:  0.54 and finally, the **LC3** model presents Multiple R-squared:  0.192,	Adjusted R-squared:  0.192.
+
+The Manova results are:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+summary(manova(my.model))
+```
+
+
+
+##2c. Remember to run the interaction effect between AS and period. Can you carry out some sort of 2-step model, model one includes all the control, and the main predictors, and model two adds the interaction effect. And then compare the significant changes between model one and model using R-squared change. 
+
+Here the same Multivariate Regression Model with the AS and Key.period interaction
+
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+license.df <- within(license.df, appropriability_strategy <- relevel(appropriability_strategy, ref = "private-collective"))
+library(broom)
+my.model <- lm(cbind(LC1,LC2,LC3) ~ appropriability_strategy+key.event+collection_count+
+                                    files_count+thing_like_count+made_count+(appropriability_strategy*key.event)
+                                    ,data=license.df) 
+
+coef<-tidy(my.model)
+table1<-coef[,c(1,2,3)]
+table1<- table1 %>%
+         spread(response, estimate) 
+colnames(table1)[1]<-"Coefficients"
+kable(table1)
+
+table2<-coef[,c(1,2,4)]
+table2<- table2 %>%
+         spread(response, std.error) 
+colnames(table2)[1]<-"Std. Error"
+kable(table2)
+
+table3<-coef[,c(1,2,5)]
+table3<- table3 %>%
+         spread(response, statistic) 
+colnames(table3)[1]<-"Z-value"
+kable(table3)
+
+table4<-coef[,c(1,2,6)]
+table4<- table4 %>%
+         spread(response, p.value) 
+colnames(table4)[1]<-"P-value"
+kable(table4)
+```
+
+The **LC1** model presents Multiple R-squared:  0.248 and	Adjusted R-squared:  0.248. The **LC2** model presents
+Multiple R-squared:  0.541,	Adjusted R-squared:  0.54 and finally, the **LC3** model presents Multiple R-squared:  0.192,	Adjusted R-squared:  0.192.
+
+The Manova results are:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+summary(manova(my.model))
+```
+
+
+2d. because one of the research hypotheses is about private-collective is more likely to sustain contribution. it’ll be useful to plot the interaction effects (see the attached for an illustration of the interaction between LC and period)
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+temp<-license.df
+temp$key.event<-as.numeric(temp$key.event)
+temp$Date<-ifelse(temp$key.event==1,"[2008-10-19, 2012-09-24)",
+                       ifelse(temp$key.event==2,"[2012-09-24, 2013-11-05)", "[2013-11-05, 2014-07-02)"))
+
+Appropriability.Strategy<-temp$appropriability_strategy
+interaction.plot(temp$key.event,Appropriability.Strategy,temp$LC1,
+                 ylab="License choice 1",xaxt="n",xlab="")
+axis(1, at=c(1, 2, 3), labels=c("2012-09-24", "2013-11-05", "2014-07-02"), tck=.01, cex.axis=0.9, srt=45, col.ticks = "grey", las=2)
+
+Appropriability.Strategy<-temp$appropriability_strategy
+interaction.plot(temp$key.event,Appropriability.Strategy,temp$LC2,
+                 ylab="License choice 2",xaxt="n",xlab="")
+axis(1, at=c(1, 2, 3), labels=c("2012-09-24", "2013-11-05", "2014-07-02"), tck=.01, cex.axis=0.9, srt=45, col.ticks = "grey", las=2)
+
+Appropriability.Strategy<-temp$appropriability_strategy
+interaction.plot(temp$key.event,Appropriability.Strategy,temp$LC3,
+                 ylab="License choice 3",xaxt="n",xlab="")
+axis(1, at=c(1, 2, 3), labels=c("2012-09-24", "2013-11-05", "2014-07-02"), tck=.01, cex.axis=0.9, srt=45, col.ticks = "grey", las=2)
+
+
+```
+
+
+#4. Use the zero inflated neg binomial (zinb) for modelling the effects on “out”. 
+##4a. Model 1: the usual control variables (files count, likes, period and perhaps collection)
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+library(pscl)
+m1 <- zeroinfl(out ~ files_count+thing_like_count+collection_count+key.event | files_count+thing_like_count+collection_count, 
+               data = license.df, dist = "negbin", EM = TRUE)
+summary(m1)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Chunk17.RData")
+library(pscl)
+library(stargazer)
+summary(m1)
+```
+
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m2<- glm.nb(out ~ files_count+thing_like_count+collection_count+key.event, data = license.df)
+vuong(m1, m2)
+```
+
+##4b. Model 2: the main effects of AS and LC: Private-collective  
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#Define the reference (Private-collective)
+license.df <- within(license.df, appropriability_strategy <- relevel(appropriability_strategy, ref = "private-collective"))
+m2 <- zeroinfl(out ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3
+                 | files_count+thing_like_count+collection_count+appropriability_strategy+LC1+LC2+LC3, 
+               data = license.df, dist = "negbin", EM = TRUE)
+save.image("Chunk18.RData")
+summary(m2)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Chunk18.RData")
+library(pscl)
+library(stargazer)
+summary(m2)
+```
+
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m3<- glm.nb(out ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3, data = license.df)
+vuong(m2, m3)
+```
+
+##4c. Model 3: testing the following two sets of interaction effects (H4, H5) 
+Appropriability strategy x Period (or key events):
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m3 <- zeroinfl(out ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event)
+                 | files_count+thing_like_count+collection_count+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event), 
+               data = license.df, dist = "negbin", EM = TRUE)
+summary(m3)
+save.image("Chunk19.RData")
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Chunk19.RData")
+library(pscl)
+library(stargazer)
+summary(m3)
+```
+
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m1<- glm.nb(out ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event), data = license.df)
+vuong(m3, m1)
+```
+
+
+Note that by definition **Appropriability strategy = Design Strategy** so it does not make sense to test this interaction.
+
+#Repeat the above steps with the outcome measure: “made”.
+##4a. Model 1: the usual control variables (files count, likes, period and perhaps collection)
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+library(pscl)
+m1 <- zeroinfl(made_count ~ files_count+thing_like_count+collection_count+key.event | files_count+thing_like_count+collection_count, 
+               data = license.df, dist = "negbin", EM = TRUE)
+summary(m1)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Chunk20.RData")
+library(pscl)
+library(stargazer)
+summary(m1)
+```
+
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m2<- glm.nb(made_count ~ files_count+thing_like_count+collection_count+key.event | files_count+thing_like_count+collection_count, data = license.df)
+vuong(m1, m2)
+```
+
+##4b. Model 2: the main effects of AS and LC: Private-collective  
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m2 <- zeroinfl(made_count ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3
+                 | files_count+thing_like_count+collection_count+appropriability_strategy+LC1+LC2+LC3, 
+               data = license.df, dist = "negbin", EM = TRUE)
+summary(m2)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Chunk21.RData")
+library(pscl)
+library(stargazer)
+summary(m2)
+```
+
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m1<- glm.nb(made_count ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3, data = license.df)
+vuong(m2, m1)
+```
+
+
+##4c. Model 3: testing the following two sets of interaction effects (H4, H5) 
+Appropriability strategy x Period (or key events):
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m3 <- zeroinfl(made_count ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event)
+                 | files_count+thing_like_count+collection_count+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event), 
+               data = license.df, dist = "negbin", EM = TRUE)
+summary(m3)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Chunk22.RData")
+library(pscl)
+library(stargazer)
+summary(m3)
+```
+
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m1<- glm.nbmade_count ~ files_count+thing_like_count+collection_count+key.event+appropriability_strategy+LC1+LC2+LC3+(appropriability_strategy*key.event), data = license.df)
+vuong(m3, m1)
+```
