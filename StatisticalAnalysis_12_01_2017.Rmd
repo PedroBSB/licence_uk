@@ -1,6 +1,8 @@
 ---
 title: "Statistical Analysis"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -60,8 +62,9 @@ All variables used in this previous descriptive statistics are interval quantita
 
 
 ###Frequency Table between Key Event and Appropriability Strategy.
-```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
-CrossTable(license.df$key.event, license.df$appropriability_strategy)
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE, results='asis'}
+library(pander)
+pander(CrossTable(license.df$key.event, license.df$appropriability_strategy))
 ```
 
 
