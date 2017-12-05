@@ -1,0 +1,131 @@
+---
+title: "Statistical Analysis"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Revised model.
+
+```{r, echo=TRUE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE, results='asis'}
+library(xtable)
+library(MASS)
+library(knitr)
+library(pscl)
+library(stargazer)
+library(tidyverse)
+library(pastecs)
+library(gmodels)
+library(pscl)
+
+#Read the dataset
+license.df<-read.csv("Data/AggreatedData.csv")
+license.df<-na.omit(license.df)
+license.df$key.event<-as.factor(license.df$key.event)
+license.df <- within(license.df, key.event <- relevel(key.event, ref = "1"))
+
+#1. Rename ES to “license_choice” and then recode ES1 & ES3 as LC1 (label: no_derivative), ES2 as LC2 (attribution), ES4 as LC3 (antibusiness)
+license.df <- license.df %>% 
+  mutate(LC1 = ES1+ES3,
+         LC2 = ES2,
+         LC3 = ES4) %>% 
+  select(-ES1,-ES2,-ES3,-ES4)
+
+
+#2. Rename design_strategy as “appropriability_strategy” and recode blended strategy as “private-collective”, and the others remain the same. 
+license.df <- license.df %>% 
+  rename(appropriability_strategy = design.strategy)
+levels(license.df$appropriability_strategy)[levels(license.df$appropriability_strategy)=="blended"] <- "private-collective"
+
+```
+
+#Model 1: controls:
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#model 1: controls
+m1 <- zeroinfl(out ~ files_count+thing_like_count, data = license.df, dist = "negbin", EM = TRUE)
+save.image("outModel1.RData")
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("outModel1.RData")
+library(pscl)
+library(stargazer)
+summary(m1)
+```
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m1 <- zeroinfl(made_count ~ files_count+thing_like_count, data = license.df, dist = "negbin", EM = TRUE)
+save.image("madeModel1.RData")
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("madeModel1.RData")
+library(pscl)
+library(stargazer)
+summary(m1)
+```
+
+
+#Model 2:  main effects all the independent variables:
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m2 <- zeroinfl(out ~ appropriability_strategy+ key.event+LC1+LC2+LC3+ files_count+thing_like_count, data = license.df, dist = "negbin", EM = TRUE)
+save.image("outModel2.RData")
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("outModel2.RData")
+library(pscl)
+library(stargazer)
+summary(m2)
+```
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m2 <- zeroinfl(made_count ~ appropriability_strategy+ key.event+LC1+LC2+LC3+ files_count+thing_like_count, data = license.df, dist = "negbin", EM = TRUE)
+save.image("madeModel2.RData")
+
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("madeModel2.RData")
+library(pscl)
+library(stargazer)
+summary(m2)
+```
+
+
+
+#Model 3:  interaction effects: Appropriation Strategy x Licence Choice (Hypothesis 3) 
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m3 <- zeroinfl(out ~ appropriability_strategy+ key.event+LC1+LC2+LC3+ files_count+thing_like_count+
+                 (LC1*key.event+LC2*key.event+LC3*key.event)+(appropriability_strategy*key.event), data = license.df, dist = "negbin", EM = TRUE)
+save.image("outModel3.RData")
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("outModel3.RData")
+library(pscl)
+library(stargazer)
+summary(m3)
+```
+
+```{r, echo=TRUE,eval=FALSE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+m3 <- zeroinfl(made_count ~ appropriability_strategy+ key.event+LC1+LC2+LC3+ files_count+thing_like_count+
+                 (LC1*key.event+LC2*key.event+LC3*key.event)+(appropriability_strategy*key.event), data = license.df, dist = "negbin", EM = TRUE)
+save.image("madeModel3.RData")
+
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("madeModel3.RData")
+library(pscl)
+library(stargazer)
+summary(m3)
+```
+
+
+
