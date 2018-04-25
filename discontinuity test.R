@@ -51,11 +51,11 @@ with(license.df, t.test(out ~ Dummy3))
 
 
 #Propensity Score (Key Event 1)
-m_ps <- glm(Dummy1 ~ files_count+ thing_like_count+collection_count,
+m_ps1 <- glm(Dummy1 ~ files_count+ thing_like_count+collection_count,
             family = binomial(), data = license.df)
-summary(m_ps)
-prs_df <- data.frame(pr_score = predict(m_ps, type = "response"),
-                     Dummy1 = m_ps$model$Dummy1)
+summary(m_ps1)
+prs_df <- data.frame(pr_score = predict(m_ps1, type = "response"),
+                     Dummy1 = m_ps1$model$Dummy1)
 labs <- paste("Key event:", c("1", "Other"))
 prs_df %>%
   mutate(Dummy1 = ifelse(Dummy1 == 1, labs[1], labs[2])) %>%
@@ -67,11 +67,11 @@ prs_df %>%
 
 
 #Propensity Score (Key Event 2)
-m_ps <- glm(Dummy2 ~ files_count+ thing_like_count+collection_count,
+m_ps2 <- glm(Dummy2 ~ files_count+ thing_like_count+collection_count,
             family = binomial(), data = license.df)
-summary(m_ps)
-prs_df <- data.frame(pr_score = predict(m_ps, type = "response"),
-                     Dummy2 = m_ps$model$Dummy2)
+summary(m_ps2)
+prs_df <- data.frame(pr_score = predict(m_ps2, type = "response"),
+                     Dummy2 = m_ps2$model$Dummy2)
 labs <- paste("Key event:", c("1", "Other"))
 prs_df %>%
   mutate(Dummy2 = ifelse(Dummy2 == 1, labs[1], labs[2])) %>%
@@ -83,11 +83,11 @@ prs_df %>%
 
 
 #Propensity Score (Key Event 3)
-m_ps <- glm(Dummy3 ~ files_count+ thing_like_count+collection_count,
+m_ps3 <- glm(Dummy3 ~ files_count+ thing_like_count+collection_count,
             family = binomial(), data = license.df)
-summary(m_ps)
-prs_df <- data.frame(pr_score = predict(m_ps, type = "response"),
-                     Dummy3 = m_ps$model$Dummy3)
+summary(m_ps3)
+prs_df <- data.frame(pr_score = predict(m_ps3, type = "response"),
+                     Dummy3 = m_ps3$model$Dummy3)
 labs <- paste("Key event:", c("1", "Other"))
 prs_df %>%
   mutate(Dummy2 = ifelse(Dummy3 == 1, labs[1], labs[2])) %>%
