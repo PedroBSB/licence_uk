@@ -4,7 +4,7 @@ library(tidyverse)
 library(markovchain)
 library(cluster)
 library(NbClust)
-
+library(igraph)
 license.df<-read_xlsx("Data/upload_date.xlsx",1)
 #Create the factors
 license.df$license<-as.factor(license.df$license)
@@ -57,6 +57,18 @@ plot(hc)
 # Add rectangle around 3 groups
 rect.hclust(hc, k = 3, border = 2:4) 
 
+
+#Create the graph nodes
+graph_o <- graph_from_adjacency_matrix(as.matrix(transMat), mode = "directed", weighted =T)
+
+#Find communities spinglass.community walktrap.community
+fc <- spinglass.community(graph_o)
+
+#Plota as comunidades:
+plot(fc, graph_o)
+
+
+
 ###################  By Key Event (Key Event 1:)
 
 
@@ -101,6 +113,14 @@ plot(hc1)
 # Add rectangle around 3 groups
 rect.hclust(hc1, k = 4, border = 2:4) 
 
+#Create the graph nodes
+graph_o1 <- graph_from_adjacency_matrix(as.matrix(transMat1), mode = "directed", weighted =T)
+
+#Find communities spinglass.community walktrap.community
+fc1 <- spinglass.community(graph_o1)
+
+#Plota as comunidades:
+plot(fc1, graph_o1)
 
 ###################  By Key Event (Key Event 2:)
 
@@ -146,6 +166,15 @@ plot(hc2)
 # Add rectangle around 4 groups
 rect.hclust(hc2, k = 4, border = 2:4) 
 
+#Create the graph nodes
+graph_o2 <- graph_from_adjacency_matrix(as.matrix(transMat2), mode = "directed", weighted =T)
+
+#Find communities spinglass.community walktrap.community
+fc2 <- spinglass.community(graph_o2)
+
+#Plota as comunidades:
+plot(fc2, graph_o2)
+
 ###################  By Key Event (Key Event 3:)
 
 temp3<- license.df %>% 
@@ -189,3 +218,11 @@ plot(hc3)
 # Add rectangle around 4 groups
 rect.hclust(hc1, k = 4, border = 3:4) 
 
+#Create the graph nodes
+graph_o3 <- graph_from_adjacency_matrix(as.matrix(transMat3), mode = "directed", weighted =T)
+
+#Find communities spinglass.community walktrap.community
+fc3 <- spinglass.community(graph_o3)
+
+#Plota as comunidades:
+plot(fc3, graph_o3)
