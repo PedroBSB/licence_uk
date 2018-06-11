@@ -51,7 +51,7 @@ Then we used the sum scores by factor (DiStenfao, Zhu, and Mindrila, 2009) as fo
 
 * **Factor 3:** anti_social_rivarly = licence2 + licence6 
 
-* **Factor 4:** collective_rivalry = licence8 - licence1 (**Is this a minus sign???**)
+* **Factor 4:** collective_rivalry = licence8 - licence1 
 
 
 ```{r,echo=FALSE, message=FALSE, warning=FALSE}
@@ -84,29 +84,121 @@ The control variable: keyevents
 
 The variables entered in the zero-inflated part are: made, and files count
 
-
-```{r, message=FALSE, warning=FALSE}
-factor.df$key.event<-as.factor(factor.df$key.event)
-#Model 1:
-m1 <- zeroinfl(out ~  key.event|made_count+ files_count, data = factor.df, dist = "negbin", EM = TRUE)
-summary(m1)
-save.image("Report1.RData")
-```
-
-
-
-
-
 The main predictors are: private-collective (which is dummy coded (for h1); and four types of license use (for h2); and the interaction effect between private-collective and collective rivalry
 
 For H1 testing, the models to be tested in zinb are: 
 
-Model 1: the zero inflated part by entering made and filescount
-Model 2: the control variable – key events
-Model 3 (for h1): the main predictors
-Model 4 (for h2): the four types of license use
-Model 5 (for h3): the interaction effect between private-collective and collective rivalry PLUS additional interaction effects between private-collecdtive with the other three licenses. 
+**Model 1: the zero inflated part by entering made and filescount**
 
+
+```{r ,message=FALSE, warning=FALSE}
+factor.df$key.event<-as.factor(factor.df$key.event)
+
+#Model 1:
+m1 <- zeroinfl(out ~ 1 | made_count+ files_count, data = factor.df, dist = "negbin", EM = TRUE)
+summary(m1)
+save.image("Report1.RData")
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Report1.RData")
+library(pscl)
+library(stargazer)
+summary(m1)
+```
+
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+mv1<- glm.nb(out ~ 1, data = factor.df)
+vuong(m1, mv1)
+```
+
+**Model 2: the control variable – key events**
+
+
+```{r ,message=FALSE, warning=FALSE}
+#Model 2:
+m2 <- zeroinfl(out ~ key.event|made_count+ files_count, data = factor.df, dist = "negbin", EM = TRUE)
+summary(m2)
+save.image("Report2.RData")
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Report2.RData")
+library(pscl)
+library(stargazer)
+summary(m2)
+```
+
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+mv2<- glm.nb(out ~ key.event, data = factor.df)
+vuong(m2, mv2)
+```
+
+**Model 3 (for h1): the main predictors**
+
+
+```{r ,message=FALSE, warning=FALSE}
+#Model 3:
+m3 <- zeroinfl(out ~ design.strategy + key.event|made_count+ files_count, data = factor.df, dist = "negbin", EM = TRUE)
+summary(m3)
+save.image("Report3.RData")
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Report3.RData")
+library(pscl)
+library(stargazer)
+summary(m3)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+mv3<- glm.nb(out ~ design.strategy + key.event, data = factor.df)
+vuong(m3, mv2)
+```
+
+**Model 4 (for h2): the four types of license use**
+```{r ,message=FALSE, warning=FALSE}
+#Model 4:
+m4 <- zeroinfl(out ~ copyleft+ anticompetition+ anti_social_rivarly+collective_rivalry+ design.strategy + key.event|made_count+ files_count, data = factor.df, dist = "negbin", EM = TRUE)
+summary(m4)
+save.image("Report4.RData")
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Report4.RData")
+library(pscl)
+library(stargazer)
+summary(m4)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#mv4<- glm.nb(out ~copyleft+ anticompetition+ anti_social_rivarly+collective_rivalry+ design.strategy + key.event, data = factor.df)
+#vuong(m4, mv4)
+```
+
+**Model 5 (for h3): the interaction effect between private-collective and collective rivalry PLUS additional interaction effects between private-collecdtive with the other three licenses. **
+```{r ,message=FALSE, warning=FALSE}
+#Model 5:
+m5 <- zeroinfl(out ~ copyleft+ anticompetition+ anti_social_rivarly+collective_rivalry+ design.strategy + key.event + (design.strategy*anticompetition)+ (design.strategy*anti_social_rivarly)+ (design.strategy*collective_rivalry)+ (design.strategy*copyleft)|made_count+ files_count, data = factor.df, dist = "negbin", EM = TRUE)
+summary(m5)
+save.image("Report5.RData")
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Report5.RData")
+library(pscl)
+library(stargazer)
+summary(m5)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#mv5<- glm.nb(out ~ copyleft+ anticompetition+ anti_social_rivarly+collective_rivalry+ design.strategy + key.event + (design.strategy*anticompetition)+ (design.strategy*anti_social_rivarly)+ (design.strategy*collective_rivalry)+ (design.strategy*copyleft), data = factor.df)
+#vuong(m5, mv5)
+```
 
 h1: private-collective increases follow-on derivatives (in contrast to private, and free riding)
 
@@ -115,7 +207,6 @@ h2: The use of collective-rivalry license will increase follow-on derivatives (o
 
 
 h3: Collective-rivalry will positively moderate the relationship between private-collective and follow-on derivatives. 
-
 
 for the h3 we need a decent plot. Last time, we are running out of time, this time we can't afford NOT to include the interaction plot. 
 
