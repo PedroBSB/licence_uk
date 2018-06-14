@@ -1,0 +1,198 @@
+---
+title: "Report"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+#Read the dataset
+library(readxl)
+library(tidyverse)
+library(factoextra)
+library(corrplot)
+library(foreign)
+library(psych)
+library(pander)
+library(xtable)
+library(xtable)
+library(MASS)
+library(knitr)
+library(pscl)
+library(stargazer)
+library(tidyverse)
+license.df<-na.omit(read_xlsx("Data/upload_date.xlsx",1))
+#Create the factors
+factor.df<-na.omit(read.csv("Data\\AggreatedData4.csv"))
+factor.df <- factor.df[,c("thing_author_id","out","copyleft","anticompetition",
+                           "anti_social_rivarly","collective_rivalry",
+                           "design.strategy","dummy_period","made_count","files_count")]
+str(factor.df)
+factor.df$design.strategy<-ifelse(factor.df$design.strategy=="blended",1,0)
+colnames(factor.df)
+
+```
+
+## Descriptive Statistics
+
+The main dataset used has the follow Descriptive Statistics:
+
+```{r, echo=FALSE, warning=FALSE, results="asis"}
+table.desc <- describe(factor.df[,-1])
+table.desc <- table.desc[,c(-1,-2,-13)]
+colnames(table.desc)<-c("Mean","Standard Dev.", "Median", "Trimmed mean","Median Absolute Deviation","Min.","Max.","Range","Skewness","Kurtosis")
+pandoc.table(table.desc, split.tables=Inf, style='rmarkdown')
+```
+
+The dataset contains `r length(unique(license.df$thing_author_id))` unique authors across `r min(license.df$upload_date)` and `r max(license.df$upload_date)` upload dates and a total of `r nrow(license.df)` observations. The next step was to find the factors based on the licenses using an agregatted dataset summarizing the variables by author and the Key periods (before 2012-09-24, between 2012-09-24 and 2013-11-05 and after 2013-11-05):
+
+
+The correlation matrix between the liceses is given by:
+
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+cor.df<-as.data.frame(round(cor(factor.df[,-1]),2))
+cor.df$Mean<-apply(factor.df[,-1],2,mean)
+cor.df$SD<-apply(factor.df[,-1],2,sd)
+cor.df<-cor.df[,c("Mean","SD","out","copyleft","anticompetition","anti_social_rivarly", "collective_rivalry","design.strategy" ,"dummy_period","made_count","files_count")]
+knitr::kable(cor.df, "html")
+```
+
+
+
+## Main hypotheses:
+
+The dependent variable: follow (in your data you labeled it as out)
+
+The control variable: keyevents
+
+The variables entered in the zero-inflated part are: made, and files count
+
+The main predictors are: private-collective (which is dummy coded (for h1); and four types of license use (for h2); and the interaction effect between private-collective and collective rivalry
+
+For H1 testing, the models to be tested in zinb are: 
+
+**Model 1: the zero inflated part by entering made and filescount**
+
+
+```{r ,message=FALSE, warning=FALSE}
+factor.df$dummy_period<-as.factor(factor.df$dummy_period)
+
+#Model 1:
+m1 <- zeroinfl(out ~ 1 | made_count+ files_count, data = factor.df, dist = "negbin", EM = TRUE)
+summary(m1)
+save.image("Report1.RData")
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Report1.RData")
+library(pscl)
+library(stargazer)
+summary(m1)
+```
+
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+mv1<- glm.nb(out ~ 1, data = factor.df)
+vuong(m1, mv1)
+```
+
+**Model 2: the control variable – key events**
+
+
+```{r ,message=FALSE, warning=FALSE}
+#Model 2:
+m2 <- zeroinfl(out ~ dummy_period|made_count+ files_count, data = factor.df, dist = "negbin", EM = TRUE)
+summary(m2)
+save.image("Report2.RData")
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Report2.RData")
+library(pscl)
+library(stargazer)
+summary(m2)
+```
+
+The **vuong** test for this model is given by:
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+mv2<- glm.nb(out ~ dummy_period, data = factor.df)
+vuong(m2, mv2)
+```
+
+**Model 3 (for h1): the main predictors**
+
+
+```{r ,message=FALSE, warning=FALSE}
+#Model 3:
+m3 <- zeroinfl(out ~ design.strategy + dummy_period|made_count+ files_count, data = factor.df, dist = "negbin", EM = TRUE)
+summary(m3)
+save.image("Report3.RData")
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Report3.RData")
+library(pscl)
+library(stargazer)
+summary(m3)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+mv3<- glm.nb(out ~ design.strategy + dummy_period, data = factor.df)
+vuong(m3, mv2)
+```
+
+**Model 4 (for h2): the four types of license use**
+```{r ,message=FALSE, warning=FALSE}
+#Model 4:
+m4 <- zeroinfl(out ~ copyleft+ anticompetition+ anti_social_rivarly+collective_rivalry+ design.strategy + dummy_period|made_count+ files_count, data = factor.df, dist = "negbin", EM = TRUE)
+summary(m4)
+save.image("Report4.RData")
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Report4.RData")
+library(pscl)
+library(stargazer)
+summary(m4)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#mv4<- glm.nb(out ~copyleft+ anticompetition+ anti_social_rivarly+collective_rivalry+ design.strategy + dummy_period, data = factor.df)
+#vuong(m4, mv4)
+```
+
+**Model 5 (for h3): the interaction effect between private-collective and collective rivalry PLUS additional interaction effects between private-collecdtive with the other three licenses. **
+```{r ,message=FALSE, warning=FALSE}
+#Model 5:
+m5 <- zeroinfl(out ~ copyleft+ anticompetition+ anti_social_rivarly+collective_rivalry+ design.strategy + dummy_period + (design.strategy*anticompetition)+ (design.strategy*anti_social_rivarly)+ (design.strategy*collective_rivalry)+ (design.strategy*copyleft)|made_count+ files_count, data = factor.df, dist = "negbin", EM = TRUE)
+summary(m5)
+save.image("Report5.RData")
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+load("Report5.RData")
+library(pscl)
+library(stargazer)
+summary(m5)
+```
+
+```{r, echo=FALSE,eval=TRUE,message=FALSE,warning=FALSE, message=FALSE, warning=FALSE}
+#mv5<- glm.nb(out ~ copyleft+ anticompetition+ anti_social_rivarly+collective_rivalry+ design.strategy + dummy_period + (design.strategy*anticompetition)+ (design.strategy*anti_social_rivarly)+ (design.strategy*collective_rivalry)+ (design.strategy*copyleft), data = factor.df)
+#vuong(m5, mv5)
+```
+
+h1: private-collective increases follow-on derivatives (in contrast to private, and free riding)
+
+
+h2: The use of collective-rivalry license will increase follow-on derivatives (other license use will be included just to show collective-rivalry will result in significant follow-on derivatives)
+
+
+h3: Collective-rivalry will positively moderate the relationship between private-collective and follow-on derivatives. 
+
+for the h3 we need a decent plot. Last time, we are running out of time, this time we can't afford NOT to include the interaction plot. 
+
+
+
